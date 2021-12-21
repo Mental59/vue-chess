@@ -1,0 +1,47 @@
+:root {
+    --font-family: 'Open Sans', sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    margin: 0;
+    padding: 0;
+}
+
+.main-page {
+    border: 5px solid #35ac66;
+    padding: 10px;
+    min-width: 600px;
+}
+
+.main-page__title {
+    margin: 0;
+    padding: 0;
+}
+
+.main-page__content-wrapper {
+    display: flex;
+    flex-direction: row;
+}
+
+.main-page__aside {
+    margin-left: 8em;
+}
+
+.unstyled-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 35px;
+}
+
+.scrollable-container {
+    max-height: 580px;
+    width: 150%;
+    overflow-y: auto;
+}
+
+.cg-board-wrap { 
+    width: 600px;
+    height: 600px;
+}
