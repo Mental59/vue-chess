@@ -1,43 +1,32 @@
 <template>
-    <div class="game main-page">
-
-        <div class="main-page__content-wrapper">
-
-            <div class="main-page__chessboard">
-                <chessboard @onMove="saveHistory"/>
-            </div>
-    
-            <div class="main-page__aside">
-
-                <h2 class="main-page__title">Ходы</h2>
-
-                <div ref="container" class="scrollable-container">
-
-                    <ul class="unstyled-list">
-                        <li v-for="item in movesHistory">
-                            {{ item.move }}
-                        </li>
-                    </ul>
-
-                </div>
-
-            </div>
-
-        </div> 
-
+    <div class="game">
+        <b-container>
+            <b-row align-v="center">
+                <b-col>
+                    <chessboard @onMove="saveHistory"/>
+                </b-col>
+                <b-col>
+                    <b-card title="Ходы" class="moves-history">
+                        <moves-container :playerMoves="movesHistory"></moves-container>
+                    </b-card>
+                </b-col>
+            </b-row>
+        </b-container>
     </div>
 </template>
 
 <script>
 import {chessboard} from 'vue-chessboard'
 import 'vue-chessboard/dist/vue-chessboard.css'
-import '../styles/index.css'
+import MovesContainer from '@/views/MovesContainer.vue'
+import '@/styles/game.css'
 
 export default {
     name: 'game',
 
     components: {
         chessboard,
+        'moves-container': MovesContainer,
     },
 
     data() {
@@ -71,14 +60,15 @@ export default {
             if (data.history.length === 0) {
                 return;
             }
+
             this.movesHistory.push(
                 {
                     id: this.cnt++,
                     move: this.transformToChessPiece(data.history[data.history.length - 1])
                 }
             );
+            
             this.turn = data.turn;
-            setTimeout(this.scrollToEnd);
         },
 
         transformToChessPiece(item) {
@@ -88,19 +78,14 @@ export default {
                 case 'R':
                 case 'B':
                 case 'N':
-                    item = this.pieces[this.turn][item[0]] + item.slice(1);
-                    break;
+                    return this.pieces[this.turn][item[0]] + item.slice(1);
+                case 'O':
+                    return item;
                 default:
-                    item = this.pieces[this.turn]['P'] + item;
-                    break;
+                    return this.pieces[this.turn]['P'] + item;
             }
-            return item;
         },
 
-        scrollToEnd() {
-            let container = this.$refs.container;
-            container.scrollTop = container.scrollHeight;
-        },
     },
 }
 
