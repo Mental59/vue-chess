@@ -5,10 +5,30 @@
                 <b-col>
                     <chessboard @onMove="saveHistory"/>
                 </b-col>
-                <b-col>
-                    <b-card title="Ходы" class="moves-history">
-                        <moves-container :playerMoves="movesHistory"></moves-container>
+                <b-col class="chessboard-aside">
+                    <stop-clock
+                        class="chess-clock__half"
+                        :minutes="minutes" :seconds="seconds"
+                        :run="run1"
+                        @stop="start2"
+                        @end="end"
+                    />
+
+                    <b-card
+                        class="moves-history"
+                        :header="firstPlayerName"
+                        :footer="secondPlayerName"
+                    >
+                        <moves-container :playerMoves="movesHistory"/>
                     </b-card>
+
+                    <stop-clock
+                        class="chess-clock__half"
+                        :minutes="minutes" :seconds="seconds"
+                        :run="run2"
+                        @stop="start1"
+                        @end="end"
+                    />
                 </b-col>
             </b-row>
         </b-container>
@@ -18,8 +38,8 @@
 <script>
 import {chessboard} from 'vue-chessboard'
 import 'vue-chessboard/dist/vue-chessboard.css'
-import MovesContainer from '@/views/MovesContainer.vue'
-import '@/styles/game.css'
+import MovesContainer from '@/components/MovesContainer.vue'
+import StopClock from '@/components/StopClock.vue'
 
 export default {
     name: 'game',
@@ -27,13 +47,26 @@ export default {
     components: {
         chessboard,
         'moves-container': MovesContainer,
+        'stop-clock': StopClock
     },
 
     data() {
         return {
+            firstPlayerName: "Player1",
+            secondPlayerName: "Player2",
+
+            minutes: 3,
+            seconds: 0,
+            isEnded: false,
+            firstPlayerTurn: true,
+            secondPlayerTurn: false,
+
             movesHistory: [],
+
             cnt: 0,
+
             turn: 'white',
+
             pieces: {
                 white: {
                     K: '♔',
@@ -51,7 +84,7 @@ export default {
                     N: '♞',
                     P: '♟'
                 },
-            },
+            }
         }
     },
 
@@ -69,6 +102,7 @@ export default {
             );
             
             this.turn = data.turn;
+            this.nextTurn();
         },
 
         transformToChessPiece(item) {
@@ -86,7 +120,70 @@ export default {
             }
         },
 
+        nextTurn() {
+            if (this.firstPlayerTurn) {
+                this.start2();
+            } else {
+                this.start1();
+            }
+        },
+
+        start1() {
+            this.firstPlayerTurn = true;
+            this.secondPlayerTurn = false;
+        },
+
+        start2() {
+            this.firstPlayerTurn = false;
+            this.secondPlayerTurn = true;
+        },
+
+        end() {
+            this.isEnded = true;
+        }
+
     },
+
+    computed: {
+        run1() {
+            return !this.isEnded && this.firstPlayerTurn;
+        },
+
+        run2() {
+            return !this.isEnded && this.secondPlayerTurn;
+        },
+
+    }
+
+}
+</script>
+
+<style>
+.game {
+    color: #bababa;
 }
 
-</script>
+.cg-board-wrap { 
+    width: 600px;
+    height: 600px;
+}
+
+.moves-history {
+    height: 400px;
+    text-align: left;
+    background-color: #423c34;
+    border-radius: 0px;
+}
+
+.card-header {
+    font-size: 2rem;
+}
+
+.card-footer {
+    font-size: 2rem;
+}
+
+.chessboard-aside {
+    margin-bottom: 20px;
+}
+</style>
