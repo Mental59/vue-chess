@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Menu</router-link> |
-      <router-link to="/chess">Chess</router-link>
+      <router-link to="/" :disabled="true" :event="''">Menu</router-link> |
+      <router-link to="/chess" :disabled="true" :event="''">Chess</router-link>
     </div>
     <router-view/>
   </div>
@@ -20,6 +20,8 @@
 
 #nav {
     padding: 30px;
+    background-color: #282520;
+    margin-bottom: 10px;
 }
 
 #nav a {
