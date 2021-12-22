@@ -35,6 +35,14 @@ export default {
   watch: {
     run() {
       this.decideStartOrStop();
+    },
+
+    countMinutes() {
+      this.$emit('update:countMinutes', this.countMinutes);
+    },
+
+    countSeconds() {
+      this.$emit('update:countSeconds', this.countSeconds);
     }
   },
 
@@ -73,6 +81,16 @@ export default {
         this.countSeconds += 60 - (PERIOD / 1000);
       } else {
         this.countSeconds -= PERIOD / 1000;
+      }
+    },
+    
+    increaseTime(seconds) {
+      let countedSeconds = this.countSeconds + seconds;
+      if (countedSeconds > 60) {
+        this.countMinutes++;
+        this.countSeconds = countedSeconds % 60;
+      } else {
+        this.countSeconds = countedSeconds;
       }
     },
 

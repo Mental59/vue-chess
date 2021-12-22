@@ -8,6 +8,7 @@
                 <b-col class="chessboard-aside">
                     <stop-clock
                         class="chess-clock__half"
+                        ref="clock1"
                         :minutes="minutes" :seconds="seconds"
                         :run="run1"
                         @stop="start2"
@@ -24,6 +25,7 @@
 
                     <stop-clock
                         class="chess-clock__half"
+                        ref="clock2"
                         :minutes="minutes" :seconds="seconds"
                         :run="run2"
                         @stop="start1"
@@ -55,7 +57,7 @@ export default {
             firstPlayerName: "Player1",
             secondPlayerName: "Player2",
 
-            minutes: 3,
+            minutes: 10,
             seconds: 0,
             isEnded: false,
             firstPlayerTurn: true,
@@ -103,6 +105,8 @@ export default {
             
             this.turn = data.turn;
             this.nextTurn();
+            // console.log(`Clock1=${this.$refs.clock1.countMinutes}:${this.$refs.clock1.countSeconds}`);
+            // console.log(`Clock1=${this.$refs.clock2.countMinutes}:${this.$refs.clock2.countSeconds}`);
         },
 
         transformToChessPiece(item) {
@@ -122,8 +126,10 @@ export default {
 
         nextTurn() {
             if (this.firstPlayerTurn) {
+                this.$refs.clock1.increaseTime(5);
                 this.start2();
             } else {
+                this.$refs.clock2.increaseTime(5);
                 this.start1();
             }
         },

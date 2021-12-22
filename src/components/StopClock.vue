@@ -13,11 +13,14 @@ Makes clock face red when out of time.
 
     <div class="stop-clock__face" :class="{'stop-clock__face_countdown-ended': isEnded, 'active-clock': isRunning }">
       <Countdown
+        ref="countdown"
         :minutes="minutes" :seconds="seconds"
         :run="runCountdown"
-        v-on:start="countdownStarted()"
-        v-on:stop="countdownStoped()"
-        v-on:end="countdownEnded()"
+        :countMinutes.sync="countMinutes"
+        :countSeconds.sync="countSeconds"
+        @start="countdownStarted()"
+        @stop="countdownStoped()"
+        @end="countdownEnded()"
       />
     </div>
 
@@ -37,7 +40,6 @@ export default {
   },
 
   props: {
-    buttonText: { type: String, default: 'Stop' },
     minutes: { type: Number, default: 0 },
     seconds: { type: Number, default: 0 },
     run: { type: Boolean, default: false },
@@ -48,6 +50,8 @@ export default {
       runCountdown: this.run,
       isRunning: this.runCountdown,
       isEnded: false,
+      countSeconds: this.seconds,
+      countMinutes: this.minutes,
     }
   },
 
@@ -76,8 +80,11 @@ export default {
       this.isRunning = false;
       this.isEnded = true;
       this.$emit('end');
-    }
+    },
 
+    increaseTime(seconds) {
+      this.$refs.countdown.increaseTime(seconds);
+    }
   }
 
 };
