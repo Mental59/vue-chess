@@ -3,7 +3,7 @@
         <b-container>
             <b-row align-v="center">
                 <b-col>
-                    <chessboard @onMove="saveHistory"/>
+                    <chessboard ref="chessboard" @onMove="saveHistory"/>
                 </b-col>
                 <b-col class="chessboard-aside">
                     <stop-clock
@@ -11,7 +11,7 @@
                         ref="clock1"
                         :minutes="clockMinutes" :seconds="clockSeconds"
                         :run="run1"
-                        @end="end"
+                        @end="endTime"
                     />
 
                     <b-card
@@ -27,7 +27,7 @@
                         ref="clock2"
                         :minutes="clockMinutes" :seconds="clockSeconds"
                         :run="run2"
-                        @end="end"
+                        @end="endTime"
                     />
                 </b-col>
             </b-row>
@@ -55,8 +55,8 @@ export default {
             firstPlayerName: "Player1",
             secondPlayerName: "Player2",
 
-            clockMinutes: 1,
-            clockSeconds: 0,
+            clockMinutes: 0,
+            clockSeconds: 5,
             isEnded: false,
             firstPlayerTurn: true,
             secondPlayerTurn: false,
@@ -99,11 +99,22 @@ export default {
                 }
             );
             
+            this.checkGameOver();
             this.turn = data.turn;
             this.nextTurn();
-            console.log(data);
             // console.log(`Clock1=${this.$refs.clock1.countMinutes}:${this.$refs.clock1.countSeconds}`);
             // console.log(`Clock1=${this.$refs.clock2.countMinutes}:${this.$refs.clock2.countSeconds}`);
+        },
+
+        checkGameOver() {
+            if (this.movesHistory[this.movesHistory.length - 1].move.slice(-1) === '#') {
+                this.isEnded = true;
+                if (this.firstPlayerTurn) {
+                    this.firstPlayerName += " winnner!"
+                } else {
+                    this.secondPlayerName += " winnner!"
+                }
+            }
         },
 
         transformToChessPiece(item) {
@@ -145,8 +156,13 @@ export default {
             this.secondPlayerTurn = true;
         },
 
-        end() {
+        endTime() {
             this.isEnded = true;
+            if (this.firstPlayerTurn) {
+                this.secondPlayerName += " winnner!"
+            } else {
+                this.firstPlayerName += " winnner!"
+            }
         }
 
     },
@@ -160,6 +176,16 @@ export default {
             return !this.isEnded && this.secondPlayerTurn;
         },
 
+    },
+
+    watch: {
+        isEnded() {
+            if (this.isEnded) {
+                this.$refs.chessboard.board.set({
+                    viewOnly: true
+                });
+            }
+        }
     }
 
 }
