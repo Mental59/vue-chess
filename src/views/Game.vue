@@ -9,9 +9,8 @@
                     <stop-clock
                         class="chess-clock__half"
                         ref="clock1"
-                        :minutes="minutes" :seconds="seconds"
+                        :minutes="clockMinutes" :seconds="clockSeconds"
                         :run="run1"
-                        @stop="start2"
                         @end="end"
                     />
 
@@ -26,9 +25,8 @@
                     <stop-clock
                         class="chess-clock__half"
                         ref="clock2"
-                        :minutes="minutes" :seconds="seconds"
+                        :minutes="clockMinutes" :seconds="clockSeconds"
                         :run="run2"
-                        @stop="start1"
                         @end="end"
                     />
                 </b-col>
@@ -48,8 +46,8 @@ export default {
 
     components: {
         chessboard,
-        'moves-container': MovesContainer,
-        'stop-clock': StopClock
+        MovesContainer,
+        StopClock
     },
 
     data() {
@@ -57,16 +55,14 @@ export default {
             firstPlayerName: "Player1",
             secondPlayerName: "Player2",
 
-            minutes: 10,
-            seconds: 0,
+            clockMinutes: 1,
+            clockSeconds: 0,
             isEnded: false,
             firstPlayerTurn: true,
             secondPlayerTurn: false,
 
             movesHistory: [],
-
             cnt: 0,
-
             turn: 'white',
 
             pieces: {
@@ -105,6 +101,7 @@ export default {
             
             this.turn = data.turn;
             this.nextTurn();
+            console.log(data);
             // console.log(`Clock1=${this.$refs.clock1.countMinutes}:${this.$refs.clock1.countSeconds}`);
             // console.log(`Clock1=${this.$refs.clock2.countMinutes}:${this.$refs.clock2.countSeconds}`);
         },
@@ -125,6 +122,10 @@ export default {
         },
 
         nextTurn() {
+            if (this.isEnded) {
+                return;
+            }
+            
             if (this.firstPlayerTurn) {
                 this.$refs.clock1.increaseTime(5);
                 this.start2();

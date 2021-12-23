@@ -11,17 +11,10 @@ Makes clock face red when out of time.
 
   <div class="stop-clock">
 
-    <div class="stop-clock__face" :class="{'stop-clock__face_countdown-ended': isEnded, 'active-clock': isRunning }">
-      <Countdown
-        ref="countdown"
-        :minutes="minutes" :seconds="seconds"
-        :run="runCountdown"
-        :countMinutes.sync="countMinutes"
-        :countSeconds.sync="countSeconds"
-        @start="countdownStarted()"
-        @stop="countdownStoped()"
-        @end="countdownEnded()"
-      />
+    <div class="stop-clock__face" :class="{'stop-clock__face_countdown-ended': isEnded, 'active-clock': run }">
+      <span>
+        {{ zeroPadding(countMinutes, 2) }}:{{ zeroPadding(countSeconds, 2) }}
+      </span>
     </div>
 
   </div>
@@ -30,61 +23,85 @@ Makes clock face red when out of time.
 
 
 <script>
-import Countdown from '@/components/Countdown.vue';
-
 export default {
   name: 'StopClock',
-
-  components: {
-    Countdown,
-  },
 
   props: {
     minutes: { type: Number, default: 0 },
     seconds: { type: Number, default: 0 },
     run: { type: Boolean, default: false },
+    period: {type: Number, default: 1000},
   },
 
   data() {
     return {
-      runCountdown: this.run,
-      isRunning: this.runCountdown,
-      isEnded: false,
-      countSeconds: this.seconds,
       countMinutes: this.minutes,
+      countSeconds: this.seconds,
+      timerID: null,
+      isEnded: false,
     }
   },
 
   watch: {
     run() {
-      this.runCountdown = this.run;
+      this.decideStartOrStop();
     }
   },
 
+  mounted() {
+    this.decideStartOrStop();
+  },
+
   methods: {
-    stop() {
-      this.runCountdown = false;
+    decideStartOrStop() {
+      if (this.run) {
+        this.start();
+      } else {
+        this.stop();
+      }
     },
 
-    countdownStarted() {
-      this.isRunning = true;
+    start() {
       this.$emit('start');
+      this.timerID = setInterval(this.decrementTime, this.period);
     },
 
-    countdownStoped() {
-      this.isRunning = false;
+    stop() {
+      clearInterval(this.timerID);
       this.$emit('stop');
     },
 
-    countdownEnded() {
-      this.isRunning = false;
-      this.isEnded = true;
-      this.$emit('end');
+    decrementTime() {
+      if (this.countMinutes === 0 && this.countSeconds < this.period / 1000) {
+        this.countSeconds = 0; // cut the tail less than this.period
+        this.stop();
+        this.isEnded = true;
+        this.$emit('end');
+        return;
+      }
+      
+      if (this.countSeconds < this.period / 1000) {
+        this.countMinutes -= 1;
+        this.countSeconds += 60 - (this.period / 1000);
+      } else {
+        this.countSeconds -= this.period / 1000;
+      }
+    },
+    
+    increaseTime(seconds) {
+      const countedSeconds = this.countSeconds + seconds;
+      if (countedSeconds > 60) {
+        this.countMinutes += Math.floor(countedSeconds / 60);
+        this.countSeconds = countedSeconds % 60;
+      } else {
+        this.countSeconds = countedSeconds;
+      }
     },
 
-    increaseTime(seconds) {
-      this.$refs.countdown.increaseTime(seconds);
+    zeroPadding(number, width) {
+      return ('0'.repeat(width) + String(number)).slice(-width);
     }
+
   }
 
 };
