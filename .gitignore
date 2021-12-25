@@ -1,6 +1,7 @@
 /client/.DS_Store
 /client/node_modules
 /client/dist
+/server/test/__pycache__
 
 
 # local env files

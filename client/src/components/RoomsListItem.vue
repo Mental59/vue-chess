@@ -7,7 +7,7 @@
                         <slot></slot>
                     </b-col>
                     <b-col align-self="center">
-                        <b-button @click="onConnect" variant="dark" class="connect-button">
+                        <b-button @click="$emit('connectGame')" variant="dark" class="connect-button">
                             Connect
                         </b-button>
                     </b-col>
@@ -21,12 +21,6 @@
 export default {
     props: {
         roomID: {type: Number, required: true},
-    },
-
-    methods: {
-        onConnect() {
-            this.$emit('onConnect', this.roomID);
-        }
     }
 }
 </script>

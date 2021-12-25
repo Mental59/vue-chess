@@ -23,8 +23,12 @@
         </b-list-group>
       </b-col>
 
-      <b-col col lg="3">
-        <rooms-list :roomsList="roomsList"></rooms-list>
+      <b-col col lg="4">
+        <rooms-list
+          class="rooms-list"
+          :roomsList="roomsList"
+          @connectGame="handleConnectGame"
+        />
       </b-col>
 
     </b-row>
@@ -35,6 +39,7 @@
 
 <script>
 import RoomsList from '@/components/RoomsList.vue'
+import Client from '@/api/grpc/client.js'
 
   export default {
     components: {
@@ -54,6 +59,16 @@ import RoomsList from '@/components/RoomsList.vue'
           'Room8',
           'Room9'
         ]
+      }
+    },
+
+    created() {
+      this.client = new Client();
+    },
+
+    methods: {
+      handleConnectGame(event) {
+        this.client.joinGame();
       }
     }
   }
@@ -82,6 +97,13 @@ a.router-link-exact-active {
 
 .menu-list__item:active {
   background-color: #b14607;
+}
+
+.rooms-list {
+  max-height: 500px;
+  margin-bottom: 10px;
+  overflow-y:scroll;
+  -webkit-overflow-scrolling: touch;
 }
 
 </style>

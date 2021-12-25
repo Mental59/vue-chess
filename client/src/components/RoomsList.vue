@@ -1,7 +1,12 @@
 <template>
     <div>
-        <b-list-group class="rooms-list">
-          <rooms-list-item v-for="(roomName, index) in roomsList" :key="index" :roomID="index">
+        <b-list-group>
+          <rooms-list-item
+            v-for="(roomName, index) in roomsList"
+            :key="index"
+            :roomID="index"
+            @connectGame="$emit('connectGame', { index })"
+          >
             {{ roomName }}
           </rooms-list-item>
         </b-list-group>
