@@ -10,13 +10,13 @@
 
             <router-link to="/chess" class="router-link-exact-active">
               <b-list-group-item class="menu-list__item">
-                Создать игру
+                Create game
               </b-list-group-item>
             </router-link>
 
             <router-link to="/">
               <b-list-group-item class="menu-list__item">
-                Найти игру
+                Find game
               </b-list-group-item>
             </router-link>
 
@@ -24,13 +24,7 @@
       </b-col>
 
       <b-col col lg="3">
-        <b-list-group class="players-list">
-          <router-link to="/" v-for="(playerName, index) in playersList" :key="index">
-            <b-list-group-item class="players-list__item">
-              {{ playerName }}
-            </b-list-group-item>
-          </router-link>
-        </b-list-group>
+        <rooms-list :roomsList="roomsList"></rooms-list>
       </b-col>
 
     </b-row>
@@ -40,14 +34,25 @@
 </template>
 
 <script>
+import RoomsList from '@/components/RoomsList.vue'
+
   export default {
+    components: {
+      RoomsList
+    },
+
     data() {
       return {
-        playersList: [
-          'Player1',
-          'Player2',
-          'Player3',
-          'Player4',
+        roomsList: [
+          'Room1',
+          'Room2',
+          'Room3',
+          'Room4',
+          'Room5',
+          'Room6',
+          'Room7',
+          'Room8',
+          'Room9'
         ]
       }
     }
@@ -77,12 +82,6 @@ a.router-link-exact-active {
 
 .menu-list__item:active {
   background-color: #b14607;
-}
-
-.players-list__item {
-  background-color: #312e2b;
-  color: #bababa;
-  font-weight: bold;
 }
 
 </style>

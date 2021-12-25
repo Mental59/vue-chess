@@ -55,8 +55,8 @@ export default {
             firstPlayerName: "Player1",
             secondPlayerName: "Player2",
 
-            clockMinutes: 0,
-            clockSeconds: 5,
+            clockMinutes: 5,
+            clockSeconds: 0,
             isEnded: false,
             firstPlayerTurn: true,
             secondPlayerTurn: false,

@@ -6,17 +6,13 @@
 
                     <b-col class="first-player-moves">
                         <b-list-group class="player-list">
-                            <b-list-group-item class="player-list__item" v-for="item in firstPlayerMoves" :key="item.id">
-                                {{ `${item.id + 1}. ${item.move}` }}
-                            </b-list-group-item>
+                            <moves-container-item v-for="move in firstPlayerMoves" :key="move.id" :move="move"/>
                         </b-list-group>
                     </b-col>
 
                     <b-col class="second-player-moves">
                         <b-list-group class="player-list">
-                            <b-list-group-item class="player-list__item" v-for="item in secondPlayerMoves" :key="item.id">
-                                {{ `${item.id + 1}. ${item.move}` }}
-                            </b-list-group-item>
+                            <moves-container-item v-for="move in secondPlayerMoves" :key="move.id" :move="move"/>
                         </b-list-group>
                     </b-col>
 
@@ -27,8 +23,16 @@
 </template>
 
 <script>
+import MovesContainerItem from '@/components/MovesContainerItem'
+
 export default {
-    props: ['playerMoves'],
+    components: {
+        MovesContainerItem
+    },
+
+    props: {
+        playerMoves: {type: Array, required: true}
+    },
 
     computed: {
         firstPlayerMoves() {
@@ -79,11 +83,6 @@ export default {
     max-height: 300px;
     margin-bottom: 10px;
     border-radius: 0px;
-}
-
-.player-list__item {
-    font-size: 30px;
-    background-color: #262421;
 }
 
 </style>
