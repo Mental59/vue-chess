@@ -3,7 +3,7 @@
         <b-container>
             <b-row align-v="center">
                 <b-col>
-                    <chessboard ref="chessboard" @onMove="saveHistory"/>
+                    <chessboard2 ref="chessboard2" @onMove="saveHistory"/>
                 </b-col>
                 <b-col class="chessboard-aside">
                     <stop-clock
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import {chessboard} from 'vue-chessboard'
+    import chessboard2 from '@/components/chess.vue'
 import 'vue-chessboard/dist/vue-chessboard.css'
 import MovesContainer from '@/components/MovesContainer.vue'
 import StopClock from '@/components/StopClock.vue'
@@ -45,7 +45,7 @@ export default {
     name: 'game',
 
     components: {
-        chessboard,
+        chessboard2,
         MovesContainer,
         StopClock
     },
