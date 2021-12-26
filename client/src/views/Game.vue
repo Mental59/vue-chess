@@ -3,7 +3,7 @@
         <b-container>
             <b-row align-v="center">
                 <b-col>
-                    <chessboard2 ref="chessboard" @onMove="saveHistory"/>
+                    <chessboard ref="chessboard" :fen="currentFen" @onMove="saveHistory"/>
                 </b-col>
                 <b-col class="chessboard-aside">
                     <stop-clock
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import chessboard2 from '@/components/Chess.vue'
+import {chessboard} from 'vue-chessboard'
 import 'vue-chessboard/dist/vue-chessboard.css'
 import MovesContainer from '@/components/MovesContainer.vue'
 import StopClock from '@/components/StopClock.vue'
@@ -45,7 +45,7 @@ export default {
     name: 'game',
 
     components: {
-        chessboard2,
+        chessboard,
         MovesContainer,
         StopClock
     },
@@ -63,7 +63,13 @@ export default {
 
             movesHistory: [],
             cnt: 0,
-            turn: 'white',
+            currentTurn: 'white',
+            currentFen: '',
+            positionInfo: null,
+            connection: null,
+            currentOrientation: 'white',
+            isWaiting: false,
+            isViewer: false,
 
             pieces: {
                 white: {
@@ -88,9 +94,17 @@ export default {
 
     methods: {
         saveHistory(data) {
-            if (data.history.length === 0) {
+            this.$refs.chessboard.board.set({orientation: this.currentOrientation, viewOnly: this.isWaiting})
+            if (data.history.length === 0 || data.fen === this.currentFen) {
                 return;
             }
+
+            const obj = {
+                fen: data.fen,
+                isViewer: this.isViewer,
+                messageType: 'Standart'
+            };
+            this.sendMessage(JSON.stringify(obj));
 
             this.movesHistory.push(
                 {
@@ -100,10 +114,96 @@ export default {
             );
             
             this.checkGameOver();
-            this.turn = data.turn;
+            this.currentTurn = data.turn;
             this.nextTurn();
-            // console.log(`Clock1=${this.$refs.clock1.countMinutes}:${this.$refs.clock1.countSeconds}`);
-            // console.log(`Clock1=${this.$refs.clock2.countMinutes}:${this.$refs.clock2.countSeconds}`);
+        },
+
+        sendMessage(message) {
+            try {
+                this.connection.send(message);
+            }
+            catch(err) {
+                console.log(err);
+            }
+        },
+
+        connect() {
+            console.log('Starting connection to WebSocket Server');
+            this.connection = new WebSocket('ws://localhost:50051');
+            let vm = this;
+
+            this.connection.onmessage = function (event) {
+                try {
+                    var dic = JSON.parse(event.data);
+
+                    vm.currentOrientation = dic.orientation;
+                    vm.isViewer = dic.status === 'true'
+                    vm.isWaiting = dic.status === 'true'
+                    vm.$refs.chessboard.board.set({ viewOnly: true });
+                    console.log(vm.$refs.chessboard.game.turn()[0]);
+                    console.log(vm.currentOrientation[0]);
+                }
+                catch (e) {
+                    vm.$refs.chessboard.game.load(event.data)
+                    if (vm.isViewer !== true) {
+                        if (vm.$refs.chessboard.game.turn()[0] !== vm.currentOrientation[0]) {
+                            vm.$refs.chessboard.board.set({ viewOnly: true })
+                            vm.isWaiting = true
+                        }
+                        else {
+                            vm.$refs.chessboard.board.set({ viewOnly: false })
+                            vm.isWaiting = false
+                        }
+                    }
+                }
+
+                vm.currentFen = event.data;
+                vm.$refs.chessboard.board.set({ orientation: vm.currentOrientation })
+            }
+
+            this.connection.onopen = function(event) {
+                console.log(event)
+                console.log("Successfully connected to the echo websocket server...")
+                vm.$refs.chessboard.board.set({ orientation: vm.currentOrientation })
+                setTimeout(() => {
+                    var myObj = new Object(); myObj.messageType = "Init"; myObj.user_id = localStorage.getItem('user_id');
+                    vm.sendMessage(JSON.stringify(myObj))
+                }, 10);
+            }
+
+            this.connection.onclose = function (event) {
+                console.log(event)
+                if (!event.wasClean) {
+                    alert("Server is down... Reconnecting...")
+                    setTimeout(function () {
+                        vm.connect();
+                    }, 5000);
+                }
+            }
+        },
+
+        async isOnline() {
+            try {
+                await fetch("https://google.com");
+                return true;
+            }
+            catch (err) {
+                console.log(err);
+            }
+            return false;
+        },
+
+        uuid() {
+            var uuidValue = "", k, randomValue;
+            for (k = 0; k < 32; k++) {
+                randomValue = Math.random() * 16 | 0;
+
+                if (k == 8 || k == 12 || k == 16 || k == 20) {
+                    uuidValue += "-"
+                }
+                uuidValue += (k == 12 ? 4 : (k == 16 ? (randomValue & 3 | 8) : randomValue)).toString(16);
+            }
+            return uuidValue;
         },
 
         checkGameOver() {
@@ -124,11 +224,11 @@ export default {
                 case 'R':
                 case 'B':
                 case 'N':
-                    return this.pieces[this.turn][item[0]] + item.slice(1);
+                    return this.pieces[this.currentTurn][item[0]] + item.slice(1);
                 case 'O':
                     return item;
                 default:
-                    return this.pieces[this.turn]['P'] + item;
+                    return this.pieces[this.currentTurn]['P'] + item;
             }
         },
 
@@ -165,6 +265,13 @@ export default {
             }
         }
 
+    },
+
+    created() {
+        this.connect();
+        if (localStorage.getItem('user_id') === null) {
+            localStorage.setItem('user_id', this.uuid());
+        }
     },
 
     computed: {
