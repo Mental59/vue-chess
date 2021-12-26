@@ -5,7 +5,8 @@
             v-for="(roomName, index) in roomsList"
             :key="index"
             :roomID="index"
-            @connectGame="$emit('connectGame', { index })"
+            @connectPlayer="$emit('connectPlayer', { index })"
+            @connectViewer="$emit('connectViewer', { index })"
           >
             {{ roomName }}
           </rooms-list-item>

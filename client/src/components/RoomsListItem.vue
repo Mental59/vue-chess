@@ -6,9 +6,16 @@
                     <b-col align-self="center">
                         <slot></slot>
                     </b-col>
+                </b-row>
+                <b-row>
                     <b-col align-self="center">
-                        <b-button @click="$emit('connectGame')" variant="dark" class="connect-button">
-                            Connect
+                        <b-button @click="$emit('connectPlayer')" variant="dark" class="connect-button">
+                            Connect as player
+                        </b-button>
+                    </b-col>
+                    <b-col align-self="center">
+                        <b-button @click="$emit('connectViewer')" variant="dark" class="connect-button">
+                            Connect as viewer
                         </b-button>
                     </b-col>
                 </b-row>

@@ -27,7 +27,8 @@
         <rooms-list
           class="rooms-list"
           :roomsList="roomsList"
-          @connectGame="handleConnectGame"
+          @connectPlayer="handleConnectPlayer"
+          @connectViewer="handleConnectViewer"
         />
       </b-col>
 
@@ -67,8 +68,11 @@ import Client from '@/api/grpc/client.js'
     },
 
     methods: {
-      handleConnectGame(event) {
+      handleConnectPlayer(event) {
         this.client.joinGame();
+      },
+      handleConnectViewer(event) {
+        console.log(event);
       }
     }
   }
