@@ -8,11 +8,11 @@ import socket
 from subprocess import Popen
 import multiprocessing
 import sys
-from PP import start
+from server.gameserver.pp import start
 
 
 host = "localhost"
-port = 5002
+port = 5000
 roomsAmount = 0
 
 server_host = 'localhost'
