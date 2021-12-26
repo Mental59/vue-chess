@@ -51,6 +51,7 @@ class DispatcherServicer(disp_grpc.DispatcherServicer):
 
     async def CreateGame(self, request: disp.User,
                          unused_context) -> disp.Game:
+        print("Hello")
         # {host,port} возвращает словарь с host port
         json_game = create_room()
         game = disp.Game(owner=request, state=0,
@@ -91,7 +92,7 @@ class DispatcherServicer(disp_grpc.DispatcherServicer):
 async def serve() -> None:
     server = grpc.aio.server()
     disp_grpc.add_DispatcherServicer_to_server(DispatcherServicer(), server)
-    server.add_insecure_port('[::]:50051')
+    server.add_insecure_port('dispatcher:14586')
     await server.start()
     await server.wait_for_termination()
 
