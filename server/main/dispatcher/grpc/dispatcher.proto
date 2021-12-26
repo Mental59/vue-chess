@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.dispatcher";
+option java_outer_classname = "Dispatcher";
+option objc_class_prefix = "DBR";
+
+package dispatcher;
+
+service Dispatcher {
+  rpc GetGameList (User) returns (stream Game) {}
+  rpc CreateGame (User) returns (Game) {}
+  rpc CloseGame (Game) returns (Status) {}
+  rpc JoinPlayer (JoinRequest) returns (Status) {}
+  rpc JoinVisitor (JoinRequest) returns (Status) {} 
+}
+
+message User {
+    string uuid = 1;
+    string name =2;
+}
+
+message Game {;
+    User owner = 1;
+    int64 state = 2;
+    string address = 3;
+    string port = 4;
+}
+
+message JoinRequest {
+    User user = 1;
+    Game game = 2;
+}
+
+message Status {
+    int64 code = 1;
+    string text = 2;
+}
+
