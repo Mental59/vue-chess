@@ -40,7 +40,7 @@
 
 <script>
 import RoomsList from '@/components/RoomsList.vue'
-import Client from '@/api/grpc/client.js'
+import { Client, createUser, createGame } from '@/api/grpc/client.js'
 
   export default {
     components: {
@@ -63,18 +63,40 @@ import Client from '@/api/grpc/client.js'
       }
     },
 
-    created() {
-      this.client = new Client();
-    },
-
     methods: {
       handleConnectPlayer(event) {
-        this.client.joinGame();
+        this.client.joinPlayer();
       },
+
       handleConnectViewer(event) {
         console.log(event);
+      },
+
+      uuid() {
+        var uuidValue = "", k, randomValue;
+        for (k = 0; k < 32; k++) {
+          randomValue = Math.random() * 16 | 0;
+
+          if (k == 8 || k == 12 || k == 16 || k == 20) {
+              uuidValue += "-"
+          }
+          uuidValue += (k == 12 ? 4 : (k == 16 ? (randomValue & 3 | 8) : randomValue)).toString(16);
+        }
+        return uuidValue;
+      },
+    },
+
+    created() {
+      if (localStorage.getItem('user_id') === null) {
+        localStorage.setItem('user_id', this.uuid());
       }
-    }
+      this.userID = localStorage.getItem('user_id');
+      this.playerName = 'Player_' + this.userID.slice(0, 8);
+      this.client = new Client(
+        createUser(this.userID, this.playerName)
+      );
+    },
+
   }
 </script>
 
