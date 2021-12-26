@@ -13,6 +13,7 @@ import dispatcher_pb2_grpc as disp_grpc
 async def create_game(stub: disp_grpc.DispatcherStub) -> None:
     user = disp.User(uuid="1", name="1")
     game = await stub.CreateGame(user)
+    print("Check")
     print(game.owner)
 
 

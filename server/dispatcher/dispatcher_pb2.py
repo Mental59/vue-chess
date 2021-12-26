@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n\022io.grpc.dispatcherB\nDispatcherP\001\242\002\003DBR',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10\x64ispatcher.proto\x12\ndispatcher\"\"\n\x04User\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"U\n\x04Game\x12\x1f\n\x05owner\x18\x01 \x01(\x0b\x32\x10.dispatcher.User\x12\r\n\x05state\x18\x02 \x01(\x03\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\x12\x0c\n\x04port\x18\x04 \x01(\t\"M\n\x0bJoinRequest\x12\x1e\n\x04user\x18\x01 \x01(\x0b\x32\x10.dispatcher.User\x12\x1e\n\x04game\x18\x02 \x01(\x0b\x32\x10.dispatcher.Game\"\x16\n\x06Status\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x03\x32\xa7\x02\n\nDispatcher\x12\x35\n\x0bGetGameList\x12\x10.dispatcher.User\x1a\x10.dispatcher.Game\"\x00\x30\x01\x12\x32\n\nCreateGame\x12\x10.dispatcher.User\x1a\x10.dispatcher.Game\"\x00\x12\x33\n\tCloseGame\x12\x10.dispatcher.Game\x1a\x12.dispatcher.Status\"\x00\x12;\n\nJoinPlayer\x12\x17.dispatcher.JoinRequest\x1a\x12.dispatcher.Status\"\x00\x12<\n\x0bJoinVisitor\x12\x17.dispatcher.JoinRequest\x1a\x12.dispatcher.Status\"\x00\x42(\n\x12io.grpc.dispatcherB\nDispatcherP\x01\xa2\x02\x03\x44\x42Rb\x06proto3'
+  serialized_pb=b'\n\x10\x64ispatcher.proto\x12\ndispatcher\"\"\n\x04User\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"U\n\x04Game\x12\x1f\n\x05owner\x18\x01 \x01(\x0b\x32\x10.dispatcher.User\x12\r\n\x05state\x18\x02 \x01(\x03\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\x12\x0c\n\x04port\x18\x04 \x01(\t\"M\n\x0bJoinRequest\x12\x1e\n\x04user\x18\x01 \x01(\x0b\x32\x10.dispatcher.User\x12\x1e\n\x04game\x18\x02 \x01(\x0b\x32\x10.dispatcher.Game\"$\n\x06Status\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x03\x12\x0c\n\x04text\x18\x02 \x01(\t2\xa7\x02\n\nDispatcher\x12\x35\n\x0bGetGameList\x12\x10.dispatcher.User\x1a\x10.dispatcher.Game\"\x00\x30\x01\x12\x32\n\nCreateGame\x12\x10.dispatcher.User\x1a\x10.dispatcher.Game\"\x00\x12\x33\n\tCloseGame\x12\x10.dispatcher.Game\x1a\x12.dispatcher.Status\"\x00\x12;\n\nJoinPlayer\x12\x17.dispatcher.JoinRequest\x1a\x12.dispatcher.Status\"\x00\x12<\n\x0bJoinVisitor\x12\x17.dispatcher.JoinRequest\x1a\x12.dispatcher.Status\"\x00\x42(\n\x12io.grpc.dispatcherB\nDispatcherP\x01\xa2\x02\x03\x44\x42Rb\x06proto3'
 )
 
 
@@ -171,6 +171,13 @@ _STATUS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='text', full_name='dispatcher.Status.text', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -184,7 +191,7 @@ _STATUS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=234,
-  serialized_end=256,
+  serialized_end=270,
 )
 
 _GAME.fields_by_name['owner'].message_type = _USER
@@ -234,8 +241,8 @@ _DISPATCHER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=259,
-  serialized_end=554,
+  serialized_start=273,
+  serialized_end=568,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetGameList',
