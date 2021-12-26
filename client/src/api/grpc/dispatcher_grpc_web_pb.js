@@ -1,5 +1,5 @@
 /**
- * @fileoverview gRPC-Web generated client stub for matchmaker
+ * @fileoverview gRPC-Web generated client stub for dispatcher
  * @enhanceable
  * @public
  */
@@ -16,7 +16,7 @@ const grpc = {};
 grpc.web = require('grpc-web');
 
 const proto = {};
-proto.matchmaker = require('./matchmaker_pb.js');
+proto.dispatcher = require('./dispatcher_pb.js');
 
 /**
  * @param {string} hostname
@@ -26,7 +26,7 @@ proto.matchmaker = require('./matchmaker_pb.js');
  * @struct
  * @final
  */
-proto.matchmaker.MatchmakerClient =
+proto.dispatcher.DispatcherClient =
     function(hostname, credentials, options) {
   if (!options) options = {};
   options.format = 'text';
@@ -52,7 +52,7 @@ proto.matchmaker.MatchmakerClient =
  * @struct
  * @final
  */
-proto.matchmaker.MatchmakerPromiseClient =
+proto.dispatcher.DispatcherPromiseClient =
     function(hostname, credentials, options) {
   if (!options) options = {};
   options.format = 'text';
@@ -73,302 +73,302 @@ proto.matchmaker.MatchmakerPromiseClient =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.matchmaker.User,
- *   !proto.matchmaker.Game>}
+ *   !proto.dispatcher.User,
+ *   !proto.dispatcher.Game>}
  */
-const methodDescriptor_Matchmaker_GetGameList = new grpc.web.MethodDescriptor(
-  '/matchmaker.Matchmaker/GetGameList',
+const methodDescriptor_Dispatcher_GetGameList = new grpc.web.MethodDescriptor(
+  '/dispatcher.Dispatcher/GetGameList',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.matchmaker.User,
-  proto.matchmaker.Game,
+  proto.dispatcher.User,
+  proto.dispatcher.Game,
   /**
-   * @param {!proto.matchmaker.User} request
+   * @param {!proto.dispatcher.User} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.matchmaker.Game.deserializeBinary
+  proto.dispatcher.Game.deserializeBinary
 );
 
 
 /**
- * @param {!proto.matchmaker.User} request The request proto
+ * @param {!proto.dispatcher.User} request The request proto
  * @param {?Object<string, string>=} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.matchmaker.Game>}
+ * @return {!grpc.web.ClientReadableStream<!proto.dispatcher.Game>}
  *     The XHR Node Readable Stream
  */
-proto.matchmaker.MatchmakerClient.prototype.getGameList =
+proto.dispatcher.DispatcherClient.prototype.getGameList =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/matchmaker.Matchmaker/GetGameList',
+      '/dispatcher.Dispatcher/GetGameList',
       request,
       metadata || {},
-      methodDescriptor_Matchmaker_GetGameList);
+      methodDescriptor_Dispatcher_GetGameList);
 };
 
 
 /**
- * @param {!proto.matchmaker.User} request The request proto
+ * @param {!proto.dispatcher.User} request The request proto
  * @param {?Object<string, string>=} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.matchmaker.Game>}
+ * @return {!grpc.web.ClientReadableStream<!proto.dispatcher.Game>}
  *     The XHR Node Readable Stream
  */
-proto.matchmaker.MatchmakerPromiseClient.prototype.getGameList =
+proto.dispatcher.DispatcherPromiseClient.prototype.getGameList =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/matchmaker.Matchmaker/GetGameList',
+      '/dispatcher.Dispatcher/GetGameList',
       request,
       metadata || {},
-      methodDescriptor_Matchmaker_GetGameList);
+      methodDescriptor_Dispatcher_GetGameList);
 };
 
 
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.matchmaker.User,
- *   !proto.matchmaker.Game>}
+ *   !proto.dispatcher.User,
+ *   !proto.dispatcher.Game>}
  */
-const methodDescriptor_Matchmaker_CreateGame = new grpc.web.MethodDescriptor(
-  '/matchmaker.Matchmaker/CreateGame',
+const methodDescriptor_Dispatcher_CreateGame = new grpc.web.MethodDescriptor(
+  '/dispatcher.Dispatcher/CreateGame',
   grpc.web.MethodType.UNARY,
-  proto.matchmaker.User,
-  proto.matchmaker.Game,
+  proto.dispatcher.User,
+  proto.dispatcher.Game,
   /**
-   * @param {!proto.matchmaker.User} request
+   * @param {!proto.dispatcher.User} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.matchmaker.Game.deserializeBinary
+  proto.dispatcher.Game.deserializeBinary
 );
 
 
 /**
- * @param {!proto.matchmaker.User} request The
+ * @param {!proto.dispatcher.User} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.RpcError, ?proto.matchmaker.Game)}
+ * @param {function(?grpc.web.RpcError, ?proto.dispatcher.Game)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.matchmaker.Game>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.dispatcher.Game>|undefined}
  *     The XHR Node Readable Stream
  */
-proto.matchmaker.MatchmakerClient.prototype.createGame =
+proto.dispatcher.DispatcherClient.prototype.createGame =
     function(request, metadata, callback) {
   return this.client_.rpcCall(this.hostname_ +
-      '/matchmaker.Matchmaker/CreateGame',
+      '/dispatcher.Dispatcher/CreateGame',
       request,
       metadata || {},
-      methodDescriptor_Matchmaker_CreateGame,
+      methodDescriptor_Dispatcher_CreateGame,
       callback);
 };
 
 
 /**
- * @param {!proto.matchmaker.User} request The
+ * @param {!proto.dispatcher.User} request The
  *     request proto
  * @param {?Object<string, string>=} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.matchmaker.Game>}
+ * @return {!Promise<!proto.dispatcher.Game>}
  *     Promise that resolves to the response
  */
-proto.matchmaker.MatchmakerPromiseClient.prototype.createGame =
+proto.dispatcher.DispatcherPromiseClient.prototype.createGame =
     function(request, metadata) {
   return this.client_.unaryCall(this.hostname_ +
-      '/matchmaker.Matchmaker/CreateGame',
+      '/dispatcher.Dispatcher/CreateGame',
       request,
       metadata || {},
-      methodDescriptor_Matchmaker_CreateGame);
+      methodDescriptor_Dispatcher_CreateGame);
 };
 
 
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.matchmaker.Game,
- *   !proto.matchmaker.Status>}
+ *   !proto.dispatcher.Game,
+ *   !proto.dispatcher.Status>}
  */
-const methodDescriptor_Matchmaker_CloseGame = new grpc.web.MethodDescriptor(
-  '/matchmaker.Matchmaker/CloseGame',
+const methodDescriptor_Dispatcher_CloseGame = new grpc.web.MethodDescriptor(
+  '/dispatcher.Dispatcher/CloseGame',
   grpc.web.MethodType.UNARY,
-  proto.matchmaker.Game,
-  proto.matchmaker.Status,
+  proto.dispatcher.Game,
+  proto.dispatcher.Status,
   /**
-   * @param {!proto.matchmaker.Game} request
+   * @param {!proto.dispatcher.Game} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.matchmaker.Status.deserializeBinary
+  proto.dispatcher.Status.deserializeBinary
 );
 
 
 /**
- * @param {!proto.matchmaker.Game} request The
+ * @param {!proto.dispatcher.Game} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.RpcError, ?proto.matchmaker.Status)}
+ * @param {function(?grpc.web.RpcError, ?proto.dispatcher.Status)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.matchmaker.Status>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.dispatcher.Status>|undefined}
  *     The XHR Node Readable Stream
  */
-proto.matchmaker.MatchmakerClient.prototype.closeGame =
+proto.dispatcher.DispatcherClient.prototype.closeGame =
     function(request, metadata, callback) {
   return this.client_.rpcCall(this.hostname_ +
-      '/matchmaker.Matchmaker/CloseGame',
+      '/dispatcher.Dispatcher/CloseGame',
       request,
       metadata || {},
-      methodDescriptor_Matchmaker_CloseGame,
+      methodDescriptor_Dispatcher_CloseGame,
       callback);
 };
 
 
 /**
- * @param {!proto.matchmaker.Game} request The
+ * @param {!proto.dispatcher.Game} request The
  *     request proto
  * @param {?Object<string, string>=} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.matchmaker.Status>}
+ * @return {!Promise<!proto.dispatcher.Status>}
  *     Promise that resolves to the response
  */
-proto.matchmaker.MatchmakerPromiseClient.prototype.closeGame =
+proto.dispatcher.DispatcherPromiseClient.prototype.closeGame =
     function(request, metadata) {
   return this.client_.unaryCall(this.hostname_ +
-      '/matchmaker.Matchmaker/CloseGame',
+      '/dispatcher.Dispatcher/CloseGame',
       request,
       metadata || {},
-      methodDescriptor_Matchmaker_CloseGame);
+      methodDescriptor_Dispatcher_CloseGame);
 };
 
 
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.matchmaker.JoinRequest,
- *   !proto.matchmaker.Status>}
+ *   !proto.dispatcher.JoinRequest,
+ *   !proto.dispatcher.Status>}
  */
-const methodDescriptor_Matchmaker_JoinPlayer = new grpc.web.MethodDescriptor(
-  '/matchmaker.Matchmaker/JoinPlayer',
+const methodDescriptor_Dispatcher_JoinPlayer = new grpc.web.MethodDescriptor(
+  '/dispatcher.Dispatcher/JoinPlayer',
   grpc.web.MethodType.UNARY,
-  proto.matchmaker.JoinRequest,
-  proto.matchmaker.Status,
+  proto.dispatcher.JoinRequest,
+  proto.dispatcher.Status,
   /**
-   * @param {!proto.matchmaker.JoinRequest} request
+   * @param {!proto.dispatcher.JoinRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.matchmaker.Status.deserializeBinary
+  proto.dispatcher.Status.deserializeBinary
 );
 
 
 /**
- * @param {!proto.matchmaker.JoinRequest} request The
+ * @param {!proto.dispatcher.JoinRequest} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.RpcError, ?proto.matchmaker.Status)}
+ * @param {function(?grpc.web.RpcError, ?proto.dispatcher.Status)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.matchmaker.Status>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.dispatcher.Status>|undefined}
  *     The XHR Node Readable Stream
  */
-proto.matchmaker.MatchmakerClient.prototype.joinPlayer =
+proto.dispatcher.DispatcherClient.prototype.joinPlayer =
     function(request, metadata, callback) {
   return this.client_.rpcCall(this.hostname_ +
-      '/matchmaker.Matchmaker/JoinPlayer',
+      '/dispatcher.Dispatcher/JoinPlayer',
       request,
       metadata || {},
-      methodDescriptor_Matchmaker_JoinPlayer,
+      methodDescriptor_Dispatcher_JoinPlayer,
       callback);
 };
 
 
 /**
- * @param {!proto.matchmaker.JoinRequest} request The
+ * @param {!proto.dispatcher.JoinRequest} request The
  *     request proto
  * @param {?Object<string, string>=} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.matchmaker.Status>}
+ * @return {!Promise<!proto.dispatcher.Status>}
  *     Promise that resolves to the response
  */
-proto.matchmaker.MatchmakerPromiseClient.prototype.joinPlayer =
+proto.dispatcher.DispatcherPromiseClient.prototype.joinPlayer =
     function(request, metadata) {
   return this.client_.unaryCall(this.hostname_ +
-      '/matchmaker.Matchmaker/JoinPlayer',
+      '/dispatcher.Dispatcher/JoinPlayer',
       request,
       metadata || {},
-      methodDescriptor_Matchmaker_JoinPlayer);
+      methodDescriptor_Dispatcher_JoinPlayer);
 };
 
 
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.matchmaker.JoinRequest,
- *   !proto.matchmaker.Status>}
+ *   !proto.dispatcher.JoinRequest,
+ *   !proto.dispatcher.Status>}
  */
-const methodDescriptor_Matchmaker_JoinVisitor = new grpc.web.MethodDescriptor(
-  '/matchmaker.Matchmaker/JoinVisitor',
+const methodDescriptor_Dispatcher_JoinVisitor = new grpc.web.MethodDescriptor(
+  '/dispatcher.Dispatcher/JoinVisitor',
   grpc.web.MethodType.UNARY,
-  proto.matchmaker.JoinRequest,
-  proto.matchmaker.Status,
+  proto.dispatcher.JoinRequest,
+  proto.dispatcher.Status,
   /**
-   * @param {!proto.matchmaker.JoinRequest} request
+   * @param {!proto.dispatcher.JoinRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.matchmaker.Status.deserializeBinary
+  proto.dispatcher.Status.deserializeBinary
 );
 
 
 /**
- * @param {!proto.matchmaker.JoinRequest} request The
+ * @param {!proto.dispatcher.JoinRequest} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.RpcError, ?proto.matchmaker.Status)}
+ * @param {function(?grpc.web.RpcError, ?proto.dispatcher.Status)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.matchmaker.Status>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.dispatcher.Status>|undefined}
  *     The XHR Node Readable Stream
  */
-proto.matchmaker.MatchmakerClient.prototype.joinVisitor =
+proto.dispatcher.DispatcherClient.prototype.joinVisitor =
     function(request, metadata, callback) {
   return this.client_.rpcCall(this.hostname_ +
-      '/matchmaker.Matchmaker/JoinVisitor',
+      '/dispatcher.Dispatcher/JoinVisitor',
       request,
       metadata || {},
-      methodDescriptor_Matchmaker_JoinVisitor,
+      methodDescriptor_Dispatcher_JoinVisitor,
       callback);
 };
 
 
 /**
- * @param {!proto.matchmaker.JoinRequest} request The
+ * @param {!proto.dispatcher.JoinRequest} request The
  *     request proto
  * @param {?Object<string, string>=} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.matchmaker.Status>}
+ * @return {!Promise<!proto.dispatcher.Status>}
  *     Promise that resolves to the response
  */
-proto.matchmaker.MatchmakerPromiseClient.prototype.joinVisitor =
+proto.dispatcher.DispatcherPromiseClient.prototype.joinVisitor =
     function(request, metadata) {
   return this.client_.unaryCall(this.hostname_ +
-      '/matchmaker.Matchmaker/JoinVisitor',
+      '/dispatcher.Dispatcher/JoinVisitor',
       request,
       metadata || {},
-      methodDescriptor_Matchmaker_JoinVisitor);
+      methodDescriptor_Dispatcher_JoinVisitor);
 };
 
 
-module.exports = proto.matchmaker;
+module.exports = proto.dispatcher;
 

@@ -1,9 +1,9 @@
-import { User, Game, JoinRequest } from './matchmaker_pb'
-import { MatchmakerClient } from './matchmaker_grpc_web_pb'
+import { User, Game, JoinRequest } from './dispatcher_pb'
+import { DispatcherClient } from './dispatcher_grpc_web_pb'
 
 export default class {
     constructor() {
-        this.connection = new MatchmakerClient("http://localhost:8080", null, null);
+        this.connection = new DispatcherClient("http://localhost:8080", null, null);
     }
 
     joinGame() {
