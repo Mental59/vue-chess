@@ -2,10 +2,10 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import matchmaker_pb2 as matchmaker__pb2
+import dispatcher_pb2 as dispatcher__pb2
 
 
-class MatchmakerStub(object):
+class DispatcherStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -14,37 +14,37 @@ class MatchmakerStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetGameList = channel.stream_stream(
-                '/matchmaker.Matchmaker/GetGameList',
-                request_serializer=matchmaker__pb2.User.SerializeToString,
-                response_deserializer=matchmaker__pb2.Game.FromString,
+        self.GetGameList = channel.unary_stream(
+                '/dispatcher.Dispatcher/GetGameList',
+                request_serializer=dispatcher__pb2.User.SerializeToString,
+                response_deserializer=dispatcher__pb2.Game.FromString,
                 )
         self.CreateGame = channel.unary_unary(
-                '/matchmaker.Matchmaker/CreateGame',
-                request_serializer=matchmaker__pb2.User.SerializeToString,
-                response_deserializer=matchmaker__pb2.Game.FromString,
+                '/dispatcher.Dispatcher/CreateGame',
+                request_serializer=dispatcher__pb2.User.SerializeToString,
+                response_deserializer=dispatcher__pb2.Game.FromString,
                 )
         self.CloseGame = channel.unary_unary(
-                '/matchmaker.Matchmaker/CloseGame',
-                request_serializer=matchmaker__pb2.Game.SerializeToString,
-                response_deserializer=matchmaker__pb2.Status.FromString,
+                '/dispatcher.Dispatcher/CloseGame',
+                request_serializer=dispatcher__pb2.Game.SerializeToString,
+                response_deserializer=dispatcher__pb2.Status.FromString,
                 )
         self.JoinPlayer = channel.unary_unary(
-                '/matchmaker.Matchmaker/JoinPlayer',
-                request_serializer=matchmaker__pb2.JoinRequest.SerializeToString,
-                response_deserializer=matchmaker__pb2.Game.FromString,
+                '/dispatcher.Dispatcher/JoinPlayer',
+                request_serializer=dispatcher__pb2.JoinRequest.SerializeToString,
+                response_deserializer=dispatcher__pb2.Status.FromString,
                 )
         self.JoinVisitor = channel.unary_unary(
-                '/matchmaker.Matchmaker/JoinVisitor',
-                request_serializer=matchmaker__pb2.JoinRequest.SerializeToString,
-                response_deserializer=matchmaker__pb2.Game.FromString,
+                '/dispatcher.Dispatcher/JoinVisitor',
+                request_serializer=dispatcher__pb2.JoinRequest.SerializeToString,
+                response_deserializer=dispatcher__pb2.Status.FromString,
                 )
 
 
-class MatchmakerServicer(object):
+class DispatcherServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def GetGameList(self, request_iterator, context):
+    def GetGameList(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -75,45 +75,45 @@ class MatchmakerServicer(object):
         raise NotImplementedError('Method not implemented!')
 
 
-def add_MatchmakerServicer_to_server(servicer, server):
+def add_DispatcherServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetGameList': grpc.stream_stream_rpc_method_handler(
+            'GetGameList': grpc.unary_stream_rpc_method_handler(
                     servicer.GetGameList,
-                    request_deserializer=matchmaker__pb2.User.FromString,
-                    response_serializer=matchmaker__pb2.Game.SerializeToString,
+                    request_deserializer=dispatcher__pb2.User.FromString,
+                    response_serializer=dispatcher__pb2.Game.SerializeToString,
             ),
             'CreateGame': grpc.unary_unary_rpc_method_handler(
                     servicer.CreateGame,
-                    request_deserializer=matchmaker__pb2.User.FromString,
-                    response_serializer=matchmaker__pb2.Game.SerializeToString,
+                    request_deserializer=dispatcher__pb2.User.FromString,
+                    response_serializer=dispatcher__pb2.Game.SerializeToString,
             ),
             'CloseGame': grpc.unary_unary_rpc_method_handler(
                     servicer.CloseGame,
-                    request_deserializer=matchmaker__pb2.Game.FromString,
-                    response_serializer=matchmaker__pb2.Status.SerializeToString,
+                    request_deserializer=dispatcher__pb2.Game.FromString,
+                    response_serializer=dispatcher__pb2.Status.SerializeToString,
             ),
             'JoinPlayer': grpc.unary_unary_rpc_method_handler(
                     servicer.JoinPlayer,
-                    request_deserializer=matchmaker__pb2.JoinRequest.FromString,
-                    response_serializer=matchmaker__pb2.Game.SerializeToString,
+                    request_deserializer=dispatcher__pb2.JoinRequest.FromString,
+                    response_serializer=dispatcher__pb2.Status.SerializeToString,
             ),
             'JoinVisitor': grpc.unary_unary_rpc_method_handler(
                     servicer.JoinVisitor,
-                    request_deserializer=matchmaker__pb2.JoinRequest.FromString,
-                    response_serializer=matchmaker__pb2.Game.SerializeToString,
+                    request_deserializer=dispatcher__pb2.JoinRequest.FromString,
+                    response_serializer=dispatcher__pb2.Status.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'matchmaker.Matchmaker', rpc_method_handlers)
+            'dispatcher.Dispatcher', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class Matchmaker(object):
+class Dispatcher(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetGameList(request_iterator,
+    def GetGameList(request,
             target,
             options=(),
             channel_credentials=None,
@@ -123,9 +123,9 @@ class Matchmaker(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_stream(request_iterator, target, '/matchmaker.Matchmaker/GetGameList',
-            matchmaker__pb2.User.SerializeToString,
-            matchmaker__pb2.Game.FromString,
+        return grpc.experimental.unary_stream(request, target, '/dispatcher.Dispatcher/GetGameList',
+            dispatcher__pb2.User.SerializeToString,
+            dispatcher__pb2.Game.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -140,9 +140,9 @@ class Matchmaker(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/matchmaker.Matchmaker/CreateGame',
-            matchmaker__pb2.User.SerializeToString,
-            matchmaker__pb2.Game.FromString,
+        return grpc.experimental.unary_unary(request, target, '/dispatcher.Dispatcher/CreateGame',
+            dispatcher__pb2.User.SerializeToString,
+            dispatcher__pb2.Game.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -157,9 +157,9 @@ class Matchmaker(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/matchmaker.Matchmaker/CloseGame',
-            matchmaker__pb2.Game.SerializeToString,
-            matchmaker__pb2.Status.FromString,
+        return grpc.experimental.unary_unary(request, target, '/dispatcher.Dispatcher/CloseGame',
+            dispatcher__pb2.Game.SerializeToString,
+            dispatcher__pb2.Status.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -174,9 +174,9 @@ class Matchmaker(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/matchmaker.Matchmaker/JoinPlayer',
-            matchmaker__pb2.JoinRequest.SerializeToString,
-            matchmaker__pb2.Game.FromString,
+        return grpc.experimental.unary_unary(request, target, '/dispatcher.Dispatcher/JoinPlayer',
+            dispatcher__pb2.JoinRequest.SerializeToString,
+            dispatcher__pb2.Status.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -191,8 +191,8 @@ class Matchmaker(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/matchmaker.Matchmaker/JoinVisitor',
-            matchmaker__pb2.JoinRequest.SerializeToString,
-            matchmaker__pb2.Game.FromString,
+        return grpc.experimental.unary_unary(request, target, '/dispatcher.Dispatcher/JoinVisitor',
+            dispatcher__pb2.JoinRequest.SerializeToString,
+            dispatcher__pb2.Status.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
