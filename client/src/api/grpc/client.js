@@ -3,7 +3,7 @@ import { MatchmakerClient } from './matchmaker_grpc_web_pb'
 
 export default class {
     constructor() {
-        this.connection = new MatchmakerClient("http://localhost:50051", null, null);
+        this.connection = new MatchmakerClient("http://localhost:8080", null, null);
     }
 
     joinGame() {

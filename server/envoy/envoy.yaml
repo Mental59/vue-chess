@@ -7,7 +7,7 @@ static_resources:
   listeners:
   - name: listener_0
     address:
-      socket_address: { address: 0.0.0.0, port_value: 50051 }
+      socket_address: { address: 0.0.0.0, port_value: 8080 }
     filter_chains:
     - filters:
       - name: envoy.http_connection_manager
@@ -21,7 +21,7 @@ static_resources:
               domains: ["*"]
               routes:
               - match: { prefix: "/" }
-                route: { cluster: matchmaker_service }
+                route: { cluster: todo_service }
               cors:
                 allow_origin: ["*"]
                 allow_methods: GET, PUT, DELETE, POST, OPTIONS
@@ -34,9 +34,9 @@ static_resources:
           - name: envoy.cors
           - name: envoy.router
   clusters:
-  - name: matchmaker_service
+  - name: todo_service
     connect_timeout: 0.25s
     type: logical_dns
     http2_protocol_options: {}
     lb_policy: round_robin
-    hosts: [{ socket_address: { address: matchmaker, port_value: 14586 }}]
+    hosts: [{ socket_address: { address: todo, port_value: 14586 }}]

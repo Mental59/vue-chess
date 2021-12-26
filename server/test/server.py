@@ -5,10 +5,7 @@ import matchmaker_pb2_grpc
 from concurrent.futures import ThreadPoolExecutor
 
 
-class MatchmakerService(matchmaker_pb2_grpc.MatchmakerServicer):
-    def __init__(self) -> None:
-        super().__init__()
-    
+class MatchmakerService(matchmaker_pb2_grpc.MatchmakerServicer):  
     def JoinPlayer(self, request, context):
         print(' [INFO] Received message!')
         print(f' [INFO] Request: {request}', f'Context: {context}', sep='\n')
