@@ -32,7 +32,7 @@ def startMainServer():
     global roomsAmount
 
     conn, addr = sock.accept()
-    
+
     print('connected:', addr)
 
     while True:
@@ -60,6 +60,3 @@ if __name__ == '__main__':
 
     while(True):
         startMainServer()
-    
-#Popen(['python', 'PP.py','localhost','5001'])
-#asyncio.run(main())

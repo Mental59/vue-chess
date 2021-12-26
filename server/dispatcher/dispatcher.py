@@ -66,6 +66,7 @@ class DispatcherServicer(disp_grpc.DispatcherServicer):
     async def CloseGame(self, request: disp.Game,
                         unused_context) -> disp.Status:
         async with redis.client() as conn:
+            pgame = pickle.dumps(request)
             await conn.set(request.uuid, pgame)
 
     async def JoinPlayer(self, request: disp.JoinRequest,
