@@ -272,6 +272,8 @@ export default {
         if (localStorage.getItem('user_id') === null) {
             localStorage.setItem('user_id', this.uuid());
         }
+        let userID = localStorage.getItem('user_id'); 
+        this.firstPlayerName = 'Player_' + userID.slice(0, 8);
     },
 
     computed: {
