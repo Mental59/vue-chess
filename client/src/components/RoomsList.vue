@@ -2,13 +2,13 @@
     <div>
         <b-list-group>
           <rooms-list-item
-            v-for="(roomName, index) in roomsList"
+            v-for="(room, index) in roomsList"
             :key="index"
-            :roomID="index"
-            @connectPlayer="$emit('connectPlayer', { index })"
-            @connectViewer="$emit('connectViewer', { index })"
+            :room="room"
+            @connectPlayer="$emit('connectPlayer', { room })"
+            @connectViewer="$emit('connectViewer', { room })"
           >
-            {{ roomName }}
+            {{ `Room_${room.owner.name}` }}
           </rooms-list-item>
         </b-list-group>
     </div>

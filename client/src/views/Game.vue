@@ -71,6 +71,8 @@ export default {
             isWaiting: false,
             isViewer: false,
 
+            currentTimeout: null,
+
             pieces: {
                 black: {
                     K: '♔',
@@ -175,7 +177,7 @@ export default {
                 console.log(event)
                 if (!event.wasClean) {
                     alert("Server is down... Reconnecting...")
-                    setTimeout(function () {
+                    vm.currentTimeout = setTimeout(function () {
                         vm.connect();
                     }, 5000);
                 }
@@ -274,6 +276,11 @@ export default {
         }
         let userID = localStorage.getItem('user_id'); 
         this.firstPlayerName = 'Player_' + userID.slice(0, 8);
+    },
+
+    destroyed() {
+        clearTimeout(this.currentTimeout);
+        this.connection.close();
     },
 
     computed: {
