@@ -40,27 +40,22 @@ import {chessboard} from 'vue-chessboard'
 import 'vue-chessboard/dist/vue-chessboard.css'
 import MovesContainer from '@/components/MovesContainer.vue'
 import StopClock from '@/components/StopClock.vue'
-
 export default {
     name: 'game',
-
     components: {
         chessboard,
         MovesContainer,
         StopClock
     },
-
     data() {
         return {
             firstPlayerName: "Player1",
             secondPlayerName: "Player2",
-
             clockMinutes: 5,
-            clockSeconds: 0,
+            clockSeconds: 5,
             isEnded: false,
             firstPlayerTurn: true,
             secondPlayerTurn: false,
-
             movesHistory: [],
             cnt: 0,
             currentTurn: 'white',
@@ -70,6 +65,9 @@ export default {
             currentOrientation: 'white',
             isWaiting: false,
             isViewer: false,
+            gameStarted: false,
+            currentTime:0,
+            currentTimeout: null,
 
             currentTimeout: null,
 
@@ -93,21 +91,19 @@ export default {
             }
         }
     },
-
     methods: {
         saveHistory(data) {
+            //this.currentTime=this.syncTime()
             this.$refs.chessboard.board.set({orientation: this.currentOrientation, viewOnly: this.isWaiting})
             if (data.history.length === 0 || data.fen === this.currentFen) {
                 return;
             }
-
             const obj = {
                 fen: data.fen,
                 isViewer: this.isViewer,
                 messageType: 'Standart'
             };
             this.sendMessage(JSON.stringify(obj));
-
             this.movesHistory.push(
                 {
                     id: this.cnt++,
@@ -119,7 +115,20 @@ export default {
             this.currentTurn = data.turn;
             this.nextTurn();
         },
-
+        sendCurrentTimeMessage()
+        {
+            var myObj =new Object();
+            myObj.messageType="Timer";
+            myObj.orientation=this.currentOrientation;
+            myObj.time=this.currentTime;
+            try {
+                this.connection.send(JSON.stringify(myObj));
+            }
+            catch(err) {
+                console.log(err);
+            }
+            
+        },
         sendMessage(message) {
             try {
                 this.connection.send(message);
@@ -128,22 +137,23 @@ export default {
                 console.log(err);
             }
         },
-
         connect() {
             console.log('Starting connection to WebSocket Server');
             this.connection = new WebSocket('ws://0.0.0.0:50051');
             let vm = this;
-
             this.connection.onmessage = function (event) {
                 try {
                     var dic = JSON.parse(event.data);
-
                     vm.currentOrientation = dic.orientation;
                     vm.isViewer = dic.status === 'true'
                     vm.isWaiting = dic.status === 'true'
+                    vm.currentFen=dic.fen
                     vm.$refs.chessboard.board.set({ viewOnly: true });
                     console.log(vm.$refs.chessboard.game.turn()[0]);
                     console.log(vm.currentOrientation[0]);
+                    console.log(dic.fen);
+                    vm.$refs.chessboard.game.load(dic.fen)
+                    this.sendMessage(vm.currentFen);
                 }
                 catch (e) {
                     vm.$refs.chessboard.game.load(event.data)
@@ -158,11 +168,9 @@ export default {
                         }
                     }
                 }
-
                 vm.currentFen = event.data;
                 vm.$refs.chessboard.board.set({ orientation: vm.currentOrientation })
             }
-
             this.connection.onopen = function(event) {
                 console.log(event)
                 console.log("Successfully connected to the echo websocket server...")
@@ -171,11 +179,12 @@ export default {
                     var myObj = new Object(); myObj.messageType = "Init"; myObj.user_id = localStorage.getItem('user_id');
                     vm.sendMessage(JSON.stringify(myObj))
                 }, 10);
+                
+                
             }
-
             this.connection.onclose = function (event) {
                 console.log(event)
-                if (!event.wasClean) {
+                if (!event.wasClean && !this.isEnded) {
                     alert("Server is down... Reconnecting...")
                     vm.currentTimeout = setTimeout(function () {
                         vm.connect();
@@ -183,7 +192,6 @@ export default {
                 }
             }
         },
-
         async isOnline() {
             try {
                 await fetch("https://google.com");
@@ -195,11 +203,17 @@ export default {
             return false;
         },
 
+        syncTime() {
+            // Set up our time object, synced by the HTTP DATE header
+            // Fetch the page over JS to get just the headers
+            var r = new XMLHttpRequest();
+            var start = (new Date).getTime();
+            return start
+                   },
         uuid() {
             var uuidValue = "", k, randomValue;
             for (k = 0; k < 32; k++) {
                 randomValue = Math.random() * 16 | 0;
-
                 if (k == 8 || k == 12 || k == 16 || k == 20) {
                     uuidValue += "-"
                 }
@@ -207,7 +221,19 @@ export default {
             }
             return uuidValue;
         },
-
+        closeConnectionAfterGame() {
+            
+            console.log("Game is over")
+            
+                setTimeout(() => {
+                    var myObj = new Object(); 
+                    myObj.messageType = "GameOver";
+                    
+                    this.sendMessage(JSON.stringify(myObj))
+                    this.connection.close();
+                    this.$router.push("/")
+                }, 5000);
+        },
         checkGameOver() {
             if (this.movesHistory[this.movesHistory.length - 1].move.slice(-1) === '#') {
                 this.isEnded = true;
@@ -216,9 +242,9 @@ export default {
                 } else {
                     this.secondPlayerName += " winnner!"
                 }
+                this.closeConnectionAfterGame();
             }
         },
-
         transformToChessPiece(item) {
             switch (item[0]) {
                 case 'K':
@@ -233,7 +259,6 @@ export default {
                     return this.pieces[this.currentTurn]['P'] + item;
             }
         },
-
         nextTurn() {
             if (this.isEnded) {
                 return;
@@ -247,17 +272,14 @@ export default {
                 this.start1();
             }
         },
-
         start1() {
             this.firstPlayerTurn = true;
             this.secondPlayerTurn = false;
         },
-
         start2() {
             this.firstPlayerTurn = false;
             this.secondPlayerTurn = true;
         },
-
         endTime() {
             this.isEnded = true;
             if (this.firstPlayerTurn) {
@@ -265,10 +287,9 @@ export default {
             } else {
                 this.firstPlayerName += " winnner!"
             }
+            this.closeConnectionAfterGame();
         }
-
     },
-
     created() {
         this.connect();
         if (localStorage.getItem('user_id') === null) {
@@ -287,13 +308,10 @@ export default {
         run1() {
             return !this.isEnded && this.firstPlayerTurn;
         },
-
         run2() {
             return !this.isEnded && this.secondPlayerTurn;
         },
-
     },
-
     watch: {
         isEnded() {
             if (this.isEnded) {
@@ -303,7 +321,6 @@ export default {
             }
         }
     }
-
 }
 </script>
 
@@ -311,27 +328,22 @@ export default {
 .game {
     color: #bababa;
 }
-
 .cg-board-wrap { 
     width: 600px;
     height: 600px;
 }
-
 .moves-history {
     height: 400px;
     text-align: left;
     background-color: #423c34;
     border-radius: 0px;
 }
-
 .card-header {
     font-size: 2rem;
 }
-
 .card-footer {
     font-size: 2rem;
 }
-
 .chessboard-aside {
     margin-bottom: 20px;
 }

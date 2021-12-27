@@ -10,7 +10,7 @@ host = ""
 port = ""
 
 websocketsList = []
-currentFen = ""
+currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 white_player = None
@@ -30,7 +30,8 @@ async def initPlayer(websocket, user_id):
 
         data = {
             "status": "false",
-            "orientation": "white"
+            "orientation": "white",
+            'fen':currentFen
         }
         await websocket.send(json.dumps(data))
     elif black_player is None and (black_player_ID == "" or black_player_ID == user_id):
@@ -38,7 +39,8 @@ async def initPlayer(websocket, user_id):
         black_player_ID = user_id
         data = {
             "status": "false",
-            "orientation": "black"
+            "orientation": "black",
+            'fen':currentFen
         }
         black_player = websocket
         black_player_ID = user_id
@@ -46,9 +48,14 @@ async def initPlayer(websocket, user_id):
     else:
         data = {
             "status": "true",
-            "orientation": "white"
+            "orientation": "white",
+            'fen':currentFen
         }
         await websocket.send(json.dumps(data))
+
+async def removeRoom():
+    print("Room Destroyed")
+    exit()
 
 
 async def sendToSocket(websocket, message):
@@ -80,8 +87,10 @@ async def handler(websocket, path):
         try:
             message = await websocket.recv()
             message = json.loads(message)
-            if (message['messageType'] == "Init"):
-                await initPlayer(websocket, message['user_id'])
+            if (message['messageType']=="Init"):
+                await initPlayer(websocket,message['user_id'])
+            elif (message['messageType']=="GameOver"):
+                await removeRoom()
             else:
                 await consumer(websocket, message)
         except websockets.ConnectionClosedOK:
@@ -106,3 +115,5 @@ async def main(h, p):
 def start(host, port):
     print("Starting Room...")
     asyncio.run(main(host, port))
+
+start("localhost",50051)
