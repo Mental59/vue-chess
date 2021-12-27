@@ -9,12 +9,22 @@
                 </b-row>
                 <b-row>
                     <b-col align-self="center">
-                        <b-button @click="$emit('connectPlayer')" variant="dark" class="connect-button">
+                        <b-button
+                            @click="$emit('connectPlayer')"
+                            variant="dark"
+                            class="connect-button"
+                            :disabled="gameStatus === 1 || gameStatus === 2"
+                        >
                             Connect as player
                         </b-button>
                     </b-col>
                     <b-col align-self="center">
-                        <b-button @click="$emit('connectViewer')" variant="dark" class="connect-button">
+                        <b-button
+                            @click="$emit('connectViewer')"
+                            variant="dark"
+                            class="connect-button"
+                            :disabled="gameStatus === 0 || gameStatus === 2"
+                        >
                             Connect as viewer
                         </b-button>
                     </b-col>
@@ -24,10 +34,16 @@
     </div>
 </template>
 
-<script setup>
+<script>
 export default {
     props: {
-        roomID: {type: Number, required: true},
+        room: {type: Object, required: true},
+    },
+
+    computed: {
+        gameStatus() {
+            return this.room.state;
+        }
     }
 }
 </script>

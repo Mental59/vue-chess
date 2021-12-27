@@ -8,17 +8,22 @@
       <b-col col lg="6">
         <b-list-group class="menu-list">
 
-            <router-link to="/chess" class="router-link-exact-active">
+            <router-link
+              to="/chess"
+              class="router-link-exact-active"
+              event=""
+              @click.native.prevent="handleCreateGame"
+            >
               <b-list-group-item class="menu-list__item">
                 Create game
               </b-list-group-item>
             </router-link>
 
-            <router-link to="/">
+            <!-- <router-link to="/">
               <b-list-group-item class="menu-list__item">
                 Find game
               </b-list-group-item>
-            </router-link>
+            </router-link> -->
 
         </b-list-group>
       </b-col>
@@ -26,7 +31,7 @@
       <b-col col lg="4">
         <rooms-list
           class="rooms-list"
-          :roomsList="roomsList"
+          :roomsList="games"
           @connectPlayer="handleConnectPlayer"
           @connectViewer="handleConnectViewer"
         />
@@ -49,32 +54,27 @@ import { Client, createUser, createGame } from '@/api/grpc/client.js'
 
     data() {
       return {
-        roomsList: [
-          'Room1',
-          'Room2',
-          'Room3',
-          'Room4',
-          'Room5',
-          'Room6',
-          'Room7',
-          'Room8',
-          'Room9'
-        ],
         games: []
       }
     },
 
     methods: {
       handleConnectPlayer(event) {
-        this.client.joinPlayer();
+        this.client.joinPlayer(createGame(event));
+        this.$router.push({path: '/chess'});
       },
 
       handleConnectViewer(event) {
-        console.log(event);
+        this.client.joinViewer(createGame(event));
+        this.$router.push({path: '/chess'});
       },
 
       handleCreateGame(event) {
-
+        if (event.isTrusted) {
+          this.client.createGame();
+          this.$router.push({path: '/chess'});
+        }
+        
       },
 
       uuid() {
