@@ -11,8 +11,17 @@ import dispatcher_pb2_grpc as disp_grpc
 
 
 async def create_game(stub: disp_grpc.DispatcherStub) -> None:
-    user = disp.User(uuid="2", name="1")
+    user = disp.User(uuid="3", name="1")
     game = await stub.CreateGame(user)
+    print("Check")
+    print(game.owner)
+
+
+async def get_game_list(stub: disp_grpc.DispatcherStub) -> None:
+    user = disp.User(uuid="2", name="1")
+    games = stub.GetGameList(user)
+    async for game in games:
+        print(f"Server {game.address}:{game.port}")
     print("Check")
     print(game.owner)
 
@@ -20,7 +29,7 @@ async def create_game(stub: disp_grpc.DispatcherStub) -> None:
 async def main() -> None:
     async with grpc.aio.insecure_channel('0.0.0.0:8080') as channel:
         stub = disp_grpc.DispatcherStub(channel)
-        await create_game(stub)
+        await get_game_list(stub)
 
 
 if __name__ == '__main__':

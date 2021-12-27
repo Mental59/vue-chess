@@ -43,7 +43,9 @@ class DispatcherServicer(disp_grpc.DispatcherServicer):
 
     async def GetGameList(self, request: disp.User,
                           unused_context) -> AsyncIterable[disp.Game]:
+        print("Start GetGameList")
         async for key in redis.scan_iter("*"):
+            print(f"key {key}")
             pgame = await redis.get(key)
             game = pickle.loads(pgame)
             print(game)
