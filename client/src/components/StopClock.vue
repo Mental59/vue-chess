@@ -25,14 +25,12 @@ Makes clock face red when out of time.
 <script>
 export default {
   name: 'StopClock',
-
   props: {
     minutes: { type: Number, default: 0 },
     seconds: { type: Number, default: 0 },
     run: { type: Boolean, default: false },
     period: {type: Number, default: 1000},
   },
-
   data() {
     return {
       countMinutes: this.minutes,
@@ -41,17 +39,14 @@ export default {
       isEnded: false,
     }
   },
-
   watch: {
     run() {
       this.decideStartOrStop();
     }
   },
-
   mounted() {
     this.decideStartOrStop();
   },
-
   methods: {
     decideStartOrStop() {
       if (this.run) {
@@ -60,17 +55,14 @@ export default {
         this.stop();
       }
     },
-
     start() {
       this.$emit('start');
       this.timerID = setInterval(this.decrementTime, this.period);
     },
-
     stop() {
       clearInterval(this.timerID);
       this.$emit('stop');
     },
-
     decrementTime() {
       if (this.countMinutes === 0 && this.countSeconds < this.period / 1000) {
         this.countSeconds = 0; // cut the tail less than this.period
@@ -97,13 +89,10 @@ export default {
         this.countSeconds = countedSeconds;
       }
     },
-
     zeroPadding(number, width) {
       return ('0'.repeat(width) + String(number)).slice(-width);
     }
-
   }
-
 };
 </script>
 
@@ -112,7 +101,6 @@ export default {
 .stop-clock {
   text-align: center;
 }
-
 .stop-clock__face {
   font-family: monospace;
   font-size: 50px;
@@ -121,14 +109,11 @@ export default {
   background-color: #262421;
   width: 300px;
 }
-
 .stop-clock__face_countdown-ended {
   background-color: #D45A18;
   color: white;
 }
-
 .active-clock {
     background-color: #384722;
 }
-
 </style>
