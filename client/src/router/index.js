@@ -10,7 +10,7 @@ const routes = [
     component: () => import('@/views/Menu.vue')
   },
   {
-    path: '/chess',
+    path: '/chess/:address/:port',
     name: 'Game',
     component: () => import('@/views/Game.vue')
   }

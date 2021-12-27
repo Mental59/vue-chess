@@ -15,7 +15,7 @@ host = "0.0.0.0"
 port = 5000
 roomsAmount = 0
 
-server_host = '0.0.0.0'
+server_host = "0.0.0.0"
 server_port = 6543
 sock = None
 

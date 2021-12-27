@@ -71,6 +71,8 @@ export default {
             vmCanMove: false,
             canMove: false,
 
+            currentTimeout: null,
+
             pieces: {
                 black: {
                     K: '♔',
@@ -142,7 +144,9 @@ export default {
         },
         connect() {
             console.log('Starting connection to WebSocket Server');
-            this.connection = new WebSocket('ws://localhost:5001');
+            const address = this.$route.params.address;
+            const port = this.$route.params.port;
+            this.connection = new WebSocket(`ws://${address}:${port}`);
             let vm = this;
             this.connection.onmessage = function (event) {
                 console.log(event.data)

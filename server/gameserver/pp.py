@@ -32,12 +32,19 @@ async def initPlayer(websocket,user_id):
         white_player = websocket
         white_player_ID=user_id
 
+<<<<<<< HEAD
         data={
             "status":"false",
             "orientation":"white",
             "fen":currentFen,
             'messageType':'Init',
             'movesHistory': movesHistory
+=======
+        data = {
+            "status": "false",
+            "orientation": "white",
+            'fen':currentFen
+>>>>>>> 13d41b35a75d2ad9c42b88f366cd730a218205c7
         }
         players+=1
         await websocket.send(json.dumps(data))
@@ -163,4 +170,8 @@ def start(host, port):
     print("Starting Room...")
     asyncio.run(main(host, port))
 
+<<<<<<< HEAD
 start("localhost",5001)
+=======
+start("localhost",50051)
+>>>>>>> 13d41b35a75d2ad9c42b88f366cd730a218205c7

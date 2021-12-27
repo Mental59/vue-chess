@@ -60,19 +60,21 @@ import { Client, createUser, createGame } from '@/api/grpc/client.js'
 
     methods: {
       handleConnectPlayer(event) {
-        this.client.joinPlayer(createGame(event));
-        this.$router.push({path: '/chess'});
+        let room = event.room;
+        this.client.joinPlayer(createGame(room));
+        this.$router.push({path: `/chess/${room.address}/${room.port}`});
       },
 
       handleConnectViewer(event) {
-        this.client.joinViewer(createGame(event));
-        this.$router.push({path: '/chess'});
+        let room = event.room;
+        this.client.joinViewer(createGame(room));
+        this.$router.push({path: `/chess/${room.address}/${room.port}`});
       },
 
-      handleCreateGame(event) {
+      async handleCreateGame(event) {
         if (event.isTrusted) {
-          this.client.createGame();
-          this.$router.push({path: '/chess'});
+          let room = await this.client.createGame();
+          this.$router.push({path: `/chess/${room.address}/${room.port}`});
         }
         
       },

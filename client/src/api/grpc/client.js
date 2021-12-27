@@ -8,9 +8,11 @@ export function createUser(uuid, name) {
     return res;
 }
 
-export function createGame(owner, state, address, port) {
+
+export function createGame({owner, state, address, port}) {
     let res = new Game();
-    res.setOwner(owner);
+    let user = createUser(owner.uuid, owner.name);
+    res.setOwner(user);
     res.setState(state);
     res.setAddress(address);
     res.setPort(port);
@@ -20,7 +22,7 @@ export function createGame(owner, state, address, port) {
 export class Client {
     constructor(user) {
         // user - текущий пользователь
-        this.connection = new DispatcherPromiseClient("http://localhost:8080", null, null);
+        this.connection = new DispatcherPromiseClient("http://172.16.10.38:8080", null, null);
         this.user = user;
         this.games = [];
         this.getGameList();
