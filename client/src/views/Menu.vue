@@ -103,6 +103,10 @@ import { Client, createUser, createGame } from '@/api/grpc/client.js'
       );
 
       this.games = this.client.games;
+    },
+
+    destroyed() {
+      clearInterval(this.client.getGameListIntervalID);
     }
 
   }
