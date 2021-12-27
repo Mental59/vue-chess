@@ -95,7 +95,13 @@ import { Client, createUser, createGame } from '@/api/grpc/client.js'
       this.client = new Client(
         createUser(this.userID, this.playerName)
       );
+      let game = this.client.createGame();
+      console.log('Game', game);
     },
+
+    mounted() {
+      console.log('Game list', this.client.getGameList());
+    }
 
   }
 </script>
