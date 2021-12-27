@@ -1,5 +1,5 @@
 import { JoinRequest, User, Game } from './dispatcher_pb'
-import { DispatcherClient } from './dispatcher_grpc_web_pb'
+import { DispatcherPromiseClient } from './dispatcher_grpc_web_pb'
 
 export function createUser(uuid, name) {
     let res = new User();
@@ -20,108 +20,77 @@ export function createGame(owner, state, address, port) {
 export class Client {
     constructor(user) {
         // user - текущий пользователь
-        this.connection = new DispatcherClient("http://localhost:8080", null, null);
+        this.connection = new DispatcherPromiseClient("http://localhost:8080", null, null);
         this.user = user;
+        this.games = [];
+        this.getGameList();
+        this.getGameListIntervalID = setInterval(() => {
+            this.getGameList();
+        }, 5000);
     }
 
-    joinPlayer(game) {
+    async joinPlayer(game) {
         // Подключение текущего пользователя "user" к выбранной игре "game" как игрок
         // Возвращает ответ сервера
-        let status = null;
         let request = new JoinRequest();
         request.setUser(this.user);
         request.setGame(game);
-        this.connection.joinPlayer(
-            request,
-            {},
-            (err, response) => {
-                if (!err) {
-                    status = response.toObject();
-                } else {
-                    console.log(err);
-                    console.log(response);
-                }     
-            }
-        );
-        return status;
+        try {
+            let status = await this.connection.joinPlayer(request, {});
+            return status.toObject();
+        } catch(err) {
+            console.log('joinPlayer err', err);
+        }
     }
 
-    joinVisitor(game) {
+    async joinVisitor(game) {
         // Подключение пользователя "user" к выбранной игре "game" как зритель
         // Возвращает ответ сервера
-        let status = null;
         let request = new JoinRequest();
         request.setUser(this.user);
         request.setGame(game);
-        this.connection.joinVisitor(
-            request,
-            {},
-            (err, response) => {
-                
-                if (!err) {
-                    status = response.toObject();
-                } else {
-                    console.log(err);
-                    console.log(response);
-                }
-            }
-        );
-        return status;
+        try {
+            let status = await this.connection.joinVisitor(request, {});
+            return status.toObject();
+        } catch(err) {
+            console.log('joinVistion err', err);
+        }
     }
 
-    createGame() {
+    async createGame() {
         // Создание комнаты (игры) под текущим пользователем
         // Возвращает созданную игру
-        let game = null;
-        this.connection.createGame(
-            this.user,
-            {},
-            (err, response) => {
-                if (!err) {
-                    game = response.toObject();
-                    console.log('game', game);
-                } else {
-                    console.log(err);
-                    console.log(response);
-                }
-            }
-        );
-        return game;
+        try {
+            let game = await this.connection.createGame(this.user, {});
+            return game.toObject();
+        } catch(err) {
+            console.log('createGame err', err);
+        }
     }
 
-    closeGame(game) {
+    async closeGame(game) {
         // Закрывает игру "game"
-        let status = null;
-        this.connection.closeGame(
-            game,
-            {},
-            (err, response) => {
-                if (!err) {
-                    status = response.toObject();
-                } else {
-                    console.log(err);
-                    console.log(response);
-                }
-            }
-        )
-        return status;
+        try {
+            let status = await this.connection.closeGame(game, {});
+            return status.toObject();
+        } catch(err) {
+            console.log('closeGame err', err);
+        }
     }
 
     getGameList() {
         // Получает список игр
-        let games = [];
-
-        var stream = this.connection.getGameList(this.user, {});
+        this.cnt++;
+        this.games.length = 0; // очищение старого списка
+        let stream = this.connection.getGameList(this.user, {});
         stream.on('data', (response) => {
-            games.push(response.toObject());
-            console.log('response', response);
+            this.games.push(response.toObject());
         });
         stream.on('error', (err) => {
             console.log(`Unexpected stream error: code = ${err.code}` +
                 `, message = "${err.message}"`);
         });
-
-        return games;
+        return this.games;
     }
 
 }

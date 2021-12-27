@@ -59,7 +59,8 @@ import { Client, createUser, createGame } from '@/api/grpc/client.js'
           'Room7',
           'Room8',
           'Room9'
-        ]
+        ],
+        games: []
       }
     },
 
@@ -70,6 +71,10 @@ import { Client, createUser, createGame } from '@/api/grpc/client.js'
 
       handleConnectViewer(event) {
         console.log(event);
+      },
+
+      handleCreateGame(event) {
+
       },
 
       uuid() {
@@ -90,17 +95,14 @@ import { Client, createUser, createGame } from '@/api/grpc/client.js'
       if (localStorage.getItem('user_id') === null) {
         localStorage.setItem('user_id', this.uuid());
       }
+
       this.userID = localStorage.getItem('user_id');
       this.playerName = 'Player_' + this.userID.slice(0, 8);
       this.client = new Client(
         createUser(this.userID, this.playerName)
       );
-      let game = this.client.createGame();
-      console.log('Game', game);
-    },
 
-    mounted() {
-      console.log('Game list', this.client.getGameList());
+      this.games = this.client.games;
     }
 
   }
