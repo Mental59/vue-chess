@@ -35,11 +35,12 @@ export class Client {
             request,
             {},
             (err, response) => {
-                console.log(err);
-                console.log(response);
                 if (!err) {
                     status = response.toObject();
-                }       
+                } else {
+                    console.log(err);
+                    console.log(response);
+                }     
             }
         );
         return status;
@@ -56,10 +57,12 @@ export class Client {
             request,
             {},
             (err, response) => {
-                console.log(err);
-                console.log(response);
+                
                 if (!err) {
                     status = response.toObject();
+                } else {
+                    console.log(err);
+                    console.log(response);
                 }
             }
         );
@@ -74,11 +77,13 @@ export class Client {
             this.user,
             {},
             (err, response) => {
-                console.log(err);
-                console.log(response);
                 if (!err) {
                     game = response.toObject();
-                };
+                    console.log('game', game);
+                } else {
+                    console.log(err);
+                    console.log(response);
+                }
             }
         );
         return game;
@@ -91,10 +96,11 @@ export class Client {
             game,
             {},
             (err, response) => {
-                console.log(err);
-                console.log(response);
                 if (!err) {
                     status = response.toObject();
+                } else {
+                    console.log(err);
+                    console.log(response);
                 }
             }
         )
@@ -108,6 +114,7 @@ export class Client {
         var stream = this.connection.getGameList(this.user, {});
         stream.on('data', (response) => {
             games.push(response.toObject());
+            console.log('response', response);
         });
         stream.on('error', (err) => {
             console.log(`Unexpected stream error: code = ${err.code}` +
