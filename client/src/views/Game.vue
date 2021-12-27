@@ -72,7 +72,7 @@ export default {
             isViewer: false,
 
             pieces: {
-                white: {
+                black: {
                     K: '♔',
                     Q: '♕',
                     R: '♖',
@@ -80,7 +80,7 @@ export default {
                     N: '♘',
                     P: '♙'
                 },
-                black: {
+                white: {
                     K: '♚',
                     Q: '♛',
                     R: '♜',
