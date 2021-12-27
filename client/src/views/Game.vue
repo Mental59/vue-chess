@@ -139,7 +139,9 @@ export default {
         },
         connect() {
             console.log('Starting connection to WebSocket Server');
-            this.connection = new WebSocket('ws://172.16.10.38:50051');
+            const address = this.$route.params.address;
+            const port = this.$route.params.port;
+            this.connection = new WebSocket(`ws://${address}:${port}`);
             let vm = this;
             this.connection.onmessage = function (event) {
                 try {
