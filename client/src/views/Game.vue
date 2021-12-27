@@ -68,6 +68,8 @@ export default {
             gameStarted: false,
             currentTime:0,
             currentTimeout: null,
+            vmCanMove: false,
+            canMove: false,
 
             pieces: {
                 black: {
@@ -96,19 +98,22 @@ export default {
             if (data.history.length === 0 || data.fen === this.currentFen) {
                 return;
             }
-            const obj = {
-                fen: data.fen,
-                isViewer: this.isViewer,
-                messageType: 'Standart'
-            };
-            this.sendMessage(JSON.stringify(obj));
             this.movesHistory.push(
                 {
                     id: this.cnt++,
                     move: this.transformToChessPiece(data.history[data.history.length - 1])
                 }
             );
+            const obj = {
+                fen: data.fen,
+                isViewer: this.isViewer,
+                history: this.movesHistory,
+                messageType: 'Standart'
+            };
+            this.sendMessage(JSON.stringify(obj));
             
+            this.isWaiting=!this.isWaiting;
+            this.$refs.chessboard.board.set({ viewOnly: this.isWaiting })
             this.checkGameOver();
             this.currentTurn = data.turn;
             this.nextTurn();
@@ -137,36 +142,63 @@ export default {
         },
         connect() {
             console.log('Starting connection to WebSocket Server');
-            this.connection = new WebSocket('ws://0.0.0.0:50051');
+            this.connection = new WebSocket('ws://localhost:5001');
             let vm = this;
             this.connection.onmessage = function (event) {
-                try {
+                console.log(event.data)
+
+                    console.log(vm.isWaiting)
+                    console.log(event.data)
                     var dic = JSON.parse(event.data);
-                    vm.currentOrientation = dic.orientation;
-                    vm.isViewer = dic.status === 'true'
-                    vm.isWaiting = dic.status === 'true'
-                    vm.currentFen=dic.fen
-                    vm.$refs.chessboard.board.set({ viewOnly: true });
-                    console.log(vm.$refs.chessboard.game.turn()[0]);
-                    console.log(vm.currentOrientation[0]);
-                    console.log(dic.fen);
-                    vm.$refs.chessboard.game.load(dic.fen)
-                    this.sendMessage(vm.currentFen);
-                }
-                catch (e) {
-                    vm.$refs.chessboard.game.load(event.data)
-                    if (vm.isViewer !== true) {
-                        if (vm.$refs.chessboard.game.turn()[0] !== vm.currentOrientation[0]) {
-                            vm.$refs.chessboard.board.set({ viewOnly: true })
-                            vm.isWaiting = true
-                        }
-                        else {
-                            vm.$refs.chessboard.board.set({ viewOnly: false })
-                            vm.isWaiting = false
+                    if (dic.messageType==="Move")
+                    {
+                        console.log("Move")
+                        console.log(dic.movesHistory)
+
+                        vm.isWaiting=!vm.isWaiting
+                        vm.$refs.chessboard.board.set({ viewOnly: vm.isWaiting })
+                        vm.currentFen = dic.fen;
+                        console.log(dic.movesHistory)
+                        vm.movesHistory=dic.movesHistory;
+                        vm.$refs.chessboard.game.load(dic.fen)
+                    }
+                    else if (dic.messageType==="Init")
+                    {
+                        vm.currentOrientation = dic.orientation;
+                        vm.isViewer = dic.status === 'true'
+                        vm.isWaiting = dic.status === 'true'
+                        vm.currentFen=dic.fen
+                        vm.$refs.chessboard.board.set({ viewOnly: true });
+                        console.log("Init")
+                        vm.$refs.chessboard.game.load(dic.fen)
+                        vm.movesHistory=dic.movesHistory
+                        var myObj =new Object();
+                        if (vm.isViewer !== true) {
+                            console.log(vm.$refs.chessboard.game.turn()[0])
+                            console.log(vm.currentOrientation[0])
+                            if (vm.$refs.chessboard.game.turn()[0] !== vm.currentOrientation[0]) {
+                                vm.$refs.chessboard.board.set({ viewOnly: true })
+                                vm.isWaiting = true
+                            }
+                            else {
+                                vm.$refs.chessboard.board.set({ viewOnly: true })
+                                vm.isWaiting=true
+                            }
                         }
                     }
-                }
-                vm.currentFen = event.data;
+                    else if (dic.messageType==="Waiting")
+                    {
+                        console.log("stop Waiting")
+                        vm.canMove=true
+                        if (vm.currentOrientation==="white")
+                            {
+                                vm.isWaiting=false
+                                vm.$refs.chessboard.board.set({ viewOnly: vm.isWaiting })
+                            }
+                        
+
+                    }
+                //svm.currentFen = event.data;
                 vm.$refs.chessboard.board.set({ orientation: vm.currentOrientation })
             }
             this.connection.onopen = function(event) {
@@ -304,10 +336,10 @@ export default {
 
     computed: {
         run1() {
-            return !this.isEnded && this.firstPlayerTurn;
+            return !this.isEnded && this.firstPlayerTurn&&this.canMove;
         },
         run2() {
-            return !this.isEnded && this.secondPlayerTurn;
+            return !this.isEnded && this.secondPlayerTurn&&this.canMove;
         },
     },
     watch: {
