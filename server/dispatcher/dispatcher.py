@@ -43,11 +43,13 @@ class DispatcherServicer(disp_grpc.DispatcherServicer):
 
     async def GetGameList(self, request: disp.User,
                           unused_context) -> AsyncIterable[disp.Game]:
+        print("Start GetGameList")
         async for key in redis.scan_iter("*"):
+            print(f"key {key}")
             pgame = await redis.get(key)
             game = pickle.loads(pgame)
+            print(game)
             yield game
-        pass
 
     async def CreateGame(self, request: disp.User,
                          unused_context) -> disp.Game:
@@ -98,4 +100,4 @@ async def serve() -> None:
 
 if __name__ == '__main__':
     redis = aioredis.from_url(s.REDIS_SERVER, encoding="utf-8", decode_responses=True)
-    asyncio.get_event_loop().run_until_complete(serve())
+    asyncio.run(serve())

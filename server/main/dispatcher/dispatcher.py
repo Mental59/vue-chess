@@ -1,6 +1,7 @@
 import asyncio
 import pickle
 from typing import AsyncIterable, Iterable
+import redis as credis
 import aioredis
 import grpc
 import json
@@ -43,35 +44,33 @@ class DispatcherServicer(disp_grpc.DispatcherServicer):
 
     async def GetGameList(self, request: disp.User,
                           unused_context) -> AsyncIterable[disp.Game]:
-        async for key in redis.scan_iter("*"):
-            pgame = await redis.get(key)
+        for key in redis.scan_iter("*"):
+            pgame = redis.get(key)
             game = pickle.loads(pgame)
             yield game
-        pass
 
     async def CreateGame(self, request: disp.User,
                          unused_context) -> disp.Game:
-        print("Hello")
         # {host,port} возвращает словарь с host port
         json_game = create_room()
         game = disp.Game(owner=request, state=0,
                          address=json_game["host"], port=json_game["port"])
         pgame = pickle.dumps(game)
 
-        async with redis.client() as conn:
-            await conn.set(request.uuid, pgame)
+        with redis.client() as conn:
+            conn.set(request.uuid, pgame)
         return game
 
     async def CloseGame(self, request: disp.Game,
                         unused_context) -> disp.Status:
-        async with redis.client() as conn:
+        with redis.client() as conn:
             pgame = pickle.dumps(request)
             await conn.set(request.uuid, pgame)
 
     async def JoinPlayer(self, request: disp.JoinRequest,
                          unused_context) -> disp.Status:
-        async with redis.client() as conn:
-            game = await conn.get(request.user.uuid)
+        with redis.client() as conn:
+            game = conn.get(request.user.uuid)
             if game is not None:
                 status = disp.Status(400, msg.STATUS[400])
             else:
@@ -80,8 +79,8 @@ class DispatcherServicer(disp_grpc.DispatcherServicer):
 
     async def JoinVisitor(self, request: disp.Game,
                           context) -> disp.Status:
-        async with redis.client() as conn:
-            game = await conn.get(request.user.uuid)
+        with redis.client() as conn:
+            game = conn.get(request.user.uuid)
             if game is not None:
                 # TODO: Add code
                 status = disp.Status(400, msg.STATUS[400])
@@ -98,5 +97,5 @@ async def serve() -> None:
 
 
 if __name__ == '__main__':
-    redis = aioredis.from_url(s.REDIS_SERVER, encoding="utf-8", decode_responses=True)
-    asyncio.get_event_loop().run_until_complete(serve())
+    redis = credis.from_url(s.REDIS_SERVER, encoding="utf-8", decode_responses=False)
+    asyncio.run(serve())

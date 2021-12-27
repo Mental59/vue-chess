@@ -67,6 +67,8 @@ export default {
             isViewer: false,
             gameStarted: false,
             currentTime:0,
+            currentTimeout: null,
+
             pieces: {
                 black: {
                     K: '♔',
@@ -135,7 +137,7 @@ export default {
         },
         connect() {
             console.log('Starting connection to WebSocket Server');
-            this.connection = new WebSocket('ws://localhost:5001');
+            this.connection = new WebSocket('ws://0.0.0.0:50051');
             let vm = this;
             this.connection.onmessage = function (event) {
                 try {
@@ -182,7 +184,7 @@ export default {
                 console.log(event)
                 if (!event.wasClean && !this.isEnded) {
                     alert("Server is down... Reconnecting...")
-                    setTimeout(function () {
+                    vm.currentTimeout = setTimeout(function () {
                         vm.connect();
                     }, 5000);
                 }
@@ -294,6 +296,12 @@ export default {
         let userID = localStorage.getItem('user_id'); 
         this.firstPlayerName = 'Player_' + userID.slice(0, 8);
     },
+
+    destroyed() {
+        clearTimeout(this.currentTimeout);
+        this.connection.close();
+    },
+
     computed: {
         run1() {
             return !this.isEnded && this.firstPlayerTurn;
