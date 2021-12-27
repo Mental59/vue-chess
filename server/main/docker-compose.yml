@@ -27,6 +27,7 @@ services:
       - dispatcher
     ports:
       - 5000-5100:5000-5100
+      - 6543:6543
     
   
 

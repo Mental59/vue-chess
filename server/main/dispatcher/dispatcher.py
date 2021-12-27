@@ -55,7 +55,7 @@ class DispatcherServicer(disp_grpc.DispatcherServicer):
                          unused_context) -> disp.Game:
         json_game = create_room()
         game = disp.Game(owner=request, state=0,
-                         address=json_game["host"], port=json_game["port"])
+                         address="172.16.10.38", port=json_game["port"])
         pgame = pickle.dumps(game)
         with redis.client() as conn:
             conn.set(request.uuid, pgame)
@@ -124,7 +124,7 @@ async def serve() -> None:
 
 if __name__ == '__main__':
     logging.basicConfig(
-        level=logging.info,
+        level=logging.INFO,
         format="%(asctime)s - %(module)s - %(levelname)s - %(funcName)s: %(lineno)d - %(message)s", 
         datefmt='%H:%M:%S',
     )
