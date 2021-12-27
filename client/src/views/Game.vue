@@ -69,6 +69,8 @@ export default {
             currentTime:0,
             currentTimeout: null,
 
+            currentTimeout: null,
+
             pieces: {
                 black: {
                     K: '♔',

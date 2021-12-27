@@ -29,11 +29,9 @@ async def initPlayer(websocket, user_id):
         white_player_ID = user_id
 
         data = {
-            
             "status": "false",
             "orientation": "white",
             'fen':currentFen
-            
         }
         await websocket.send(json.dumps(data))
     elif black_player is None and (black_player_ID == "" or black_player_ID == user_id):

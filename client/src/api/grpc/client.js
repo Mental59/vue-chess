@@ -8,6 +8,7 @@ export function createUser(uuid, name) {
     return res;
 }
 
+
 export function createGame({owner, state, address, port}) {
     let res = new Game();
     let user = createUser(owner.uuid, owner.name);
