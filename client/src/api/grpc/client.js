@@ -90,6 +90,7 @@ export class Client {
             console.log(`Unexpected stream error: code = ${err.code}` +
                 `, message = "${err.message}"`);
         });
+        console.log('New game list has been received!');
         return this.games;
     }
 
