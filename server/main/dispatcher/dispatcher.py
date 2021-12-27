@@ -69,8 +69,9 @@ class DispatcherServicer(disp_grpc.DispatcherServicer):
         with redis.client() as conn:
             game = conn.get(request.user.uuid)
             if game is not None:
-                pgame = pickle.dumps(request)
-                pgame.state = 2
+                game = request
+                game.state = 2
+                pgame = pickle.dumps(game)
                 conn.set(request.uuid, pgame)
                 conn.expire(request.uuid, s.ROOM_DELETE_TIMEOUT)
 
@@ -87,8 +88,9 @@ class DispatcherServicer(disp_grpc.DispatcherServicer):
         with redis.client() as conn:
             game = conn.get(request.user.uuid)
             if game is not None:
-                pgame = pickle.dumps(request)
-                pgame.state = 1
+                game = request
+                game.state = 1
+                pgame = pickle.dumps(game)
                 conn.set(request.uuid, pgame)
                 # Success
                 status = disp.Status(400, msg.STATUS[400])
