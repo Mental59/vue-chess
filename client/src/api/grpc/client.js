@@ -28,7 +28,7 @@ export class Client {
         this.getGameList();
         this.getGameListIntervalID = setInterval(() => {
             this.getGameList();
-        }, 5000);
+        }, 1500);
     }
 
     async joinPlayer(game) {

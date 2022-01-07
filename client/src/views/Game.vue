@@ -3,7 +3,7 @@
         <b-container>
             <b-row align-v="center">
                 <b-col>
-                    <chessboard ref="chessboard" :fen="currentFen" @onMove="saveHistory"/>
+                    <chessboard ref="chessboard" :fen="currentFen" @onMove="onMove"/>
                 </b-col>
                 <b-col class="chessboard-aside">
                     <stop-clock
@@ -40,38 +40,40 @@ import {chessboard} from 'vue-chessboard'
 import 'vue-chessboard/dist/vue-chessboard.css'
 import MovesContainer from '@/components/MovesContainer.vue'
 import StopClock from '@/components/StopClock.vue'
+
 export default {
     name: 'game',
+
     components: {
         chessboard,
         MovesContainer,
         StopClock
     },
+
     data() {
         return {
-            firstPlayerName: "Player1",
-            secondPlayerName: "Player2",
-            clockMinutes: 5,
-            clockSeconds: 5,
-            isEnded: false,
+            firstPlayerName: "UNKNOWN",
+            secondPlayerName: "UNKNOWN",
             firstPlayerTurn: true,
             secondPlayerTurn: false,
+            playerType: '',
+
+            clockMinutes: 5,
+            clockSeconds: 0,
+
             movesHistory: [],
-            cnt: 0,
+
             currentTurn: 'white',
             currentFen: '',
-            positionInfo: null,
-            connection: null,
             currentOrientation: 'white',
-            isWaiting: false,
-            isViewer: false,
-            gameStarted: false,
-            currentTime:0,
             currentTimeout: null,
-            vmCanMove: false,
-            canMove: false,
 
-            currentTimeout: null,
+            isEnded: false,
+            isWaiting: true,
+            isViewer: false,
+            isGameStarted: false,
+
+            connection: null,
 
             pieces: {
                 black: {
@@ -93,192 +95,189 @@ export default {
             }
         }
     },
+
     methods: {
-        saveHistory(data) {
-            //this.currentTime=this.syncTime()
-            this.$refs.chessboard.board.set({orientation: this.currentOrientation, viewOnly: this.isWaiting})
-            if (data.history.length === 0 || data.fen === this.currentFen) {
+        onMove(data) {
+            if (data.history.length === 0) {
                 return;
             }
+
             this.movesHistory.push(
                 {
-                    id: this.cnt++,
+                    id: data.history.length,
                     move: this.transformToChessPiece(data.history[data.history.length - 1])
                 }
             );
-            const obj = {
-                fen: data.fen,
-                isViewer: this.isViewer,
-                history: this.movesHistory,
-                messageType: 'Standart'
-            };
-            this.sendMessage(JSON.stringify(obj));
             
-            this.isWaiting=!this.isWaiting;
-            this.$refs.chessboard.board.set({ viewOnly: this.isWaiting })
             this.checkGameOver();
-            this.currentTurn = data.turn;
-            this.nextTurn();
+            this.nextTurn(data);
+
+            this.sendMessage({
+                type: "Move",
+                user: this.user,
+                isEnded: this.isEnded,
+                currentFen: this.currentFen,
+                movesHistory: this.movesHistory
+            });
         },
-        sendCurrentTimeMessage()
-        {
-            var myObj =new Object();
-            myObj.messageType="Timer";
-            myObj.orientation=this.currentOrientation;
-            myObj.time=this.currentTime;
-            try {
-                this.connection.send(JSON.stringify(myObj));
-            }
-            catch(err) {
-                console.log(err);
-            }
-            
-        },
+
         sendMessage(message) {
             try {
-                this.connection.send(message);
+                this.connection.send(JSON.stringify(message));
             }
             catch(err) {
                 console.log(err);
             }
         },
+
+        setClocktime(firstClockTime, secondClockTime) {
+            if (this.playerType === "first" || this.playerType === "viewer") {
+                this.$refs.clock1.setTime(firstClockTime);
+                this.$refs.clock2.setTime(secondClockTime);
+            } else {
+                this.$refs.clock2.setTime(firstClockTime);
+                this.$refs.clock1.setTime(secondClockTime);
+            }
+        },
+
         connect() {
             console.log('Starting connection to WebSocket Server');
+
             const address = this.$route.params.address;
             const port = this.$route.params.port;
             this.connection = new WebSocket(`ws://${address}:${port}`);
-            let vm = this;
-            this.connection.onmessage = function (event) {
-                console.log(event.data)
 
-                    console.log(vm.isWaiting)
-                    console.log(event.data)
-                    var dic = JSON.parse(event.data);
-                    if (dic.messageType==="Move")
-                    {
-                        console.log("Move")
-                        console.log(dic.movesHistory)
-
-                        vm.isWaiting=!vm.isWaiting
-                        vm.$refs.chessboard.board.set({ viewOnly: vm.isWaiting })
-                        vm.currentFen = dic.fen;
-                        console.log(dic.movesHistory)
-                        vm.movesHistory=dic.movesHistory;
-                        vm.$refs.chessboard.game.load(dic.fen)
-                    }
-                    else if (dic.messageType==="Init")
-                    {
-                        vm.currentOrientation = dic.orientation;
-                        vm.isViewer = dic.status === 'true'
-                        vm.isWaiting = dic.status === 'true'
-                        vm.currentFen=dic.fen
-                        vm.$refs.chessboard.board.set({ viewOnly: true });
-                        console.log("Init")
-                        vm.$refs.chessboard.game.load(dic.fen)
-                        vm.movesHistory=dic.movesHistory
-                        var myObj =new Object();
-                        if (vm.isViewer !== true) {
-                            console.log(vm.$refs.chessboard.game.turn()[0])
-                            console.log(vm.currentOrientation[0])
-                            if (vm.$refs.chessboard.game.turn()[0] !== vm.currentOrientation[0]) {
-                                vm.$refs.chessboard.board.set({ viewOnly: true })
-                                vm.isWaiting = true
-                            }
-                            else {
-                                vm.$refs.chessboard.board.set({ viewOnly: true })
-                                vm.isWaiting=true
-                            }
-                        }
-                    }
-                    else if (dic.messageType==="Waiting")
-                    {
-                        console.log("stop Waiting")
-                        vm.canMove=true
-                        if (vm.currentOrientation==="white")
-                            {
-                                vm.isWaiting=false
-                                vm.$refs.chessboard.board.set({ viewOnly: vm.isWaiting })
-                            }
-                        
-
-                    }
-                //svm.currentFen = event.data;
-                vm.$refs.chessboard.board.set({ orientation: vm.currentOrientation })
-            }
-            this.connection.onopen = function(event) {
-                console.log(event)
-                console.log("Successfully connected to the echo websocket server...")
-                vm.$refs.chessboard.board.set({ orientation: vm.currentOrientation })
-                setTimeout(() => {
-                    var myObj = new Object(); myObj.messageType = "Init"; myObj.user_id = localStorage.getItem('user_id');
-                    vm.sendMessage(JSON.stringify(myObj))
-                }, 10);
-                
-                
-            }
-            this.connection.onclose = function (event) {
-                console.log(event)
-                if (!event.wasClean && !this.isEnded) {
-                    alert("Server is down... Reconnecting...")
-                    vm.currentTimeout = setTimeout(function () {
-                        vm.connect();
-                    }, 5000);
-                }
-            }
-        },
-        async isOnline() {
-            try {
-                await fetch("https://google.com");
-                return true;
-            }
-            catch (err) {
-                console.log(err);
-            }
-            return false;
+            this.connection.onmessage = this.handleMessage;
+            this.connection.onopen = this.handleOpenConnection;
+            this.connection.onclose = this.handleCloseConnection;
         },
 
-        syncTime() {
-            // Set up our time object, synced by the HTTP DATE header
-            // Fetch the page over JS to get just the headers
-            var r = new XMLHttpRequest();
-            var start = (new Date).getTime();
-            return start
-                   },
-        uuid() {
-            var uuidValue = "", k, randomValue;
-            for (k = 0; k < 32; k++) {
-                randomValue = Math.random() * 16 | 0;
-                if (k == 8 || k == 12 || k == 16 || k == 20) {
-                    uuidValue += "-"
-                }
-                uuidValue += (k == 12 ? 4 : (k == 16 ? (randomValue & 3 | 8) : randomValue)).toString(16);
+        handleMessage(event) {
+            const response = JSON.parse(event.data);
+            console.log(response);
+
+            switch(response.type) {
+                case "Init":
+                    this.firstPlayerName = response.firstPlayerName;
+                    this.currentFen = response.currentFen;
+                    this.isWaiting = true;
+                    this.currentTurn = "white";
+                    this.playerType = response.playerType;
+
+                    switch (response.playerType) {
+                        case "first":
+                            this.currentOrientation = "white";
+                            this.firstPlayerTurn = true;
+                            this.secondPlayerTurn = false;
+                            break;
+                        case "second":
+                            this.currentOrientation = "black";
+                            this.firstPlayerTurn = false;
+                            this.secondPlayerTurn = true;
+                            break;
+                        case "viewer":
+                            this.currentOrientation = "white";
+                            break;
+                    }
+
+                    this.$refs.chessboard.board.set({
+                        orientation: this.currentOrientation
+                    });
+
+                    break;
+                case "PlayerIn":
+                    if (this.playerType === "viewer") {
+                        this.firstPlayerName = response.firstPlayerName;
+                        this.secondPlayerName = response.secondPlayerName;
+                    } else {
+                        this.secondPlayerName = response.secondPlayerName;
+                    }
+                    if (this.playerType === "first") {
+                        this.isWaiting = false;
+                    }
+                    this.isGameStarted = true;
+                    break;
+                case "Move":
+                    this.isEnded = response.isEnded;
+                    this.currentFen = response.currentFen;
+                    this.movesHistory = response.movesHistory;
+                    this.isWaiting = false;
+                    break;
+                case "Time":
+                    this.setClocktime(response.firstClockTime, response.secondClockTime);
+                    break;
+                case "Leave":
+                    console.log('Player has left the game');
+                    break;
+                case "Reconnect":
+                    this.firstPlayerName = response.firstPlayerName;
+                    this.secondPlayerName = response.secondPlayerName;
+                    this.firstPlayerTurn = response.firstPlayerTurn;
+                    this.secondPlayerTurn = response.secondPlayerTurn;
+                    this.currentFen = response.currentFen;
+                    this.movesHistory = response.movesHistory;
+                    this.setClocktime(response.firstClockTime, response.secondClockTime);
+                    this.currentTurn = response.currentTurn;
+                    this.isWaiting = response.isWaiting;
+                    this.currentOrientation = response.currentOrientation;
+                    this.$refs.chessboard.board.set({
+                        orientation: this.currentOrientation
+                    });
+                    break;
+                case "Timeout":
+                    this.isEnded = true;
+                    this.firstPlayerName += " Winner";
+                    break;
+                default:
+                    console.log(`Bad message type, got ${response.type}`);
+                    return;
             }
-            return uuidValue;
         },
-        closeConnectionAfterGame() {
-            
-            console.log("Game is over")
-            
-                setTimeout(() => {
-                    var myObj = new Object(); 
-                    myObj.messageType = "GameOver";
-                    
-                    this.sendMessage(JSON.stringify(myObj))
-                    this.connection.close();
-                    this.$router.push("/")
+
+        handleOpenConnection(event) {
+            this.sendMessage({
+                type: "Init",
+                user: this.user,
+            });
+        },
+
+        handleCloseConnection(event) {
+            if (!event.wasClean && !this.isEnded) {
+                console.log('Server is down, reconnecting');
+                this.currentTimeout = setTimeout(() => {
+                    this.connect();
                 }, 5000);
+                return;
+            }
+
+            this.sendMessage({
+                type: "Leave",
+                user: this.user,
+            });
         },
+
+        closeConnectionAfterGame() {
+            console.log("Game is over");
+            setTimeout(() => {               
+                this.sendMessage({
+                    messageType: "GameOver",
+                    user: this.user,
+                });
+                this.$router.push({path: "/"});
+            }, 5000);
+        },
+
         checkGameOver() {
             if (this.movesHistory[this.movesHistory.length - 1].move.slice(-1) === '#') {
                 this.isEnded = true;
                 if (this.firstPlayerTurn) {
-                    this.firstPlayerName += " winnner!"
+                    this.firstPlayerName += " winnner!";
                 } else {
-                    this.secondPlayerName += " winnner!"
+                    this.secondPlayerName += " winnner!";
                 }
-                this.closeConnectionAfterGame();
             }
         },
+
         transformToChessPiece(item) {
             switch (item[0]) {
                 case 'K':
@@ -293,44 +292,36 @@ export default {
                     return this.pieces[this.currentTurn]['P'] + item;
             }
         },
-        nextTurn() {
+
+        nextTurn(data) {
             if (this.isEnded) {
                 return;
             }
-            
-            if (this.firstPlayerTurn) {
-                this.$refs.clock1.increaseTime(5);
-                this.start2();
-            } else {
-                this.$refs.clock2.increaseTime(5);
-                this.start1();
-            }
+            this.currentTurn = data.turn;
+            this.isWaiting = true;
+            this.currentFen = data.fen;
+            this.firstPlayerTurn = !this.firstPlayerTurn;
+            this.secondPlayerTurn = !this.secondPlayerTurn;
         },
-        start1() {
-            this.firstPlayerTurn = true;
-            this.secondPlayerTurn = false;
-        },
-        start2() {
-            this.firstPlayerTurn = false;
-            this.secondPlayerTurn = true;
-        },
+
         endTime() {
             this.isEnded = true;
             if (this.firstPlayerTurn) {
-                this.secondPlayerName += " winnner!"
+                this.secondPlayerName += " winnner!";
             } else {
-                this.firstPlayerName += " winnner!"
+                this.firstPlayerName += " winnner!";
             }
-            this.closeConnectionAfterGame();
-        }
+            this.sendMessage({
+                type: "Timeout",
+                user: this.user,
+            });
+        },
+
     },
+
     created() {
         this.connect();
-        if (localStorage.getItem('user_id') === null) {
-            localStorage.setItem('user_id', this.uuid());
-        }
-        let userID = localStorage.getItem('user_id'); 
-        this.firstPlayerName = 'Player_' + userID.slice(0, 8);
+        this.user = localStorage.getItem("user_id");
     },
 
     destroyed() {
@@ -340,19 +331,25 @@ export default {
 
     computed: {
         run1() {
-            return !this.isEnded && this.firstPlayerTurn&&this.canMove;
+            return !this.isEnded && this.firstPlayerTurn && this.isGameStarted;
         },
         run2() {
-            return !this.isEnded && this.secondPlayerTurn&&this.canMove;
+            return !this.isEnded && this.secondPlayerTurn && this.isGameStarted;
         },
     },
+
     watch: {
         isEnded() {
             if (this.isEnded) {
                 this.$refs.chessboard.board.set({
                     viewOnly: true
                 });
+                this.closeConnectionAfterGame();
             }
+        },
+
+        isWaiting() {
+            this.$refs.chessboard.board.set({ viewOnly: this.isWaiting })
         }
     }
 }

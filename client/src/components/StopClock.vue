@@ -89,6 +89,12 @@ export default {
         this.countSeconds = countedSeconds;
       }
     },
+
+    setTime(seconds) {
+      this.countSeconds = seconds % 60;
+      this.countMinutes = Math.floor(seconds / 60);
+    },
+
     zeroPadding(number, width) {
       return ('0'.repeat(width) + String(number)).slice(-width);
     }
