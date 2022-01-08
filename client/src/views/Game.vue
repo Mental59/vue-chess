@@ -3,7 +3,7 @@
         <b-container>
             <b-row align-v="center">
                 <b-col>
-                    <chessboard ref="chessboard" :fen="currentFen" @onMove="onMove"/>
+                    <chessboard ref="chessboard" :fen="currentFen" :orientation="currentOrientation" @onMove="onMove"/>
                 </b-col>
                 <b-col class="chessboard-aside">
                     <stop-clock
@@ -104,7 +104,7 @@ export default {
 
             this.movesHistory.push(
                 {
-                    id: data.history.length,
+                    id: data.history.length - 1,
                     move: this.transformToChessPiece(data.history[data.history.length - 1])
                 }
             );
@@ -180,10 +180,6 @@ export default {
                             break;
                     }
 
-                    this.$refs.chessboard.board.set({
-                        orientation: this.currentOrientation
-                    });
-
                     break;
                 case "PlayerIn":
                     if (this.playerType === "viewer") {
@@ -220,9 +216,6 @@ export default {
                     this.currentTurn = response.currentTurn;
                     this.isWaiting = response.isWaiting;
                     this.currentOrientation = response.currentOrientation;
-                    this.$refs.chessboard.board.set({
-                        orientation: this.currentOrientation
-                    });
                     break;
                 case "Timeout":
                     this.isEnded = true;
