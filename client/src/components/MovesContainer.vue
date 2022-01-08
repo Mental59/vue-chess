@@ -6,13 +6,13 @@
 
                     <b-col class="first-player-moves">
                         <b-list-group class="player-list">
-                            <moves-container-item v-for="move in firstPlayerMoves" :key="move.id" :move="move"/>
+                            <moves-container-item v-for="(move, index) in firstPlayerMoves" :key="index" :id="index" :move="move"/>
                         </b-list-group>
                     </b-col>
 
                     <b-col class="second-player-moves">
                         <b-list-group class="player-list">
-                            <moves-container-item v-for="move in secondPlayerMoves" :key="move.id" :move="move"/>
+                            <moves-container-item v-for="(move, index) in secondPlayerMoves" :key="index" :id="index" :move="move"/>
                         </b-list-group>
                     </b-col>
 

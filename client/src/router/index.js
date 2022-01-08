@@ -11,6 +11,7 @@ const routes = [
   },
   {
     path: '/chess/:address/:port',
+    // path: '/chess',
     name: 'Game',
     component: () => import('@/views/Game.vue')
   }

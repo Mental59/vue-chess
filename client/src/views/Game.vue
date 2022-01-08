@@ -63,48 +63,41 @@ export default {
 
             movesHistory: [],
 
-            currentTurn: 'white',
             currentFen: '',
             currentOrientation: 'white',
             currentTimeout: null,
 
             isEnded: false,
-            isWaiting: true,
+            isWaiting: null,
             isViewer: false,
             isGameStarted: false,
 
             connection: null,
 
             pieces: {
-                black: {
-                    K: '♔',
-                    Q: '♕',
-                    R: '♖',
-                    B: '♗',
-                    N: '♘',
-                    P: '♙'
-                },
-                white: {
-                    K: '♚',
-                    Q: '♛',
-                    R: '♜',
-                    B: '♝',
-                    N: '♞',
-                    P: '♟'
-                },
+                K: '♔',
+                Q: '♕',
+                R: '♖',
+                B: '♗',
+                N: '♘',
+                P: '♙'
             }
         }
     },
 
     methods: {
         onMove(data) {
-            if (data.history.length === 0) {
+            this.$refs.chessboard.board.set({
+                viewOnly: this.isWaiting
+            });
+            if (data.history.length === 0 || data.fen === this.currentFen) {
                 return;
             }
+            console.log('onMove emitted!');
+            console.log(data);
 
             this.movesHistory.push(
                 {
-                    id: data.history.length - 1,
                     move: this.transformToChessPiece(data.history[data.history.length - 1])
                 }
             );
@@ -145,7 +138,7 @@ export default {
 
             const address = this.$route.params.address;
             const port = this.$route.params.port;
-            this.connection = new WebSocket(`ws://${address}:${port}`);
+            this.connection = new WebSocket(`ws://localhost:5001`);
 
             this.connection.onmessage = this.handleMessage;
             this.connection.onopen = this.handleOpenConnection;
@@ -161,7 +154,6 @@ export default {
                     this.firstPlayerName = response.firstPlayerName;
                     this.currentFen = response.currentFen;
                     this.isWaiting = true;
-                    this.currentTurn = "white";
                     this.playerType = response.playerType;
 
                     switch (response.playerType) {
@@ -186,7 +178,10 @@ export default {
                         this.firstPlayerName = response.firstPlayerName;
                         this.secondPlayerName = response.secondPlayerName;
                     } else {
-                        this.secondPlayerName = response.secondPlayerName;
+                        if (this.playerType === "first")
+                            this.secondPlayerName = response.secondPlayerName;
+                        else
+                            this.secondPlayerName=response.firstPlayerName;
                     }
                     if (this.playerType === "first") {
                         this.isWaiting = false;
@@ -194,9 +189,11 @@ export default {
                     this.isGameStarted = true;
                     break;
                 case "Move":
-                    this.isEnded = response.isEnded;
                     this.currentFen = response.currentFen;
+                    this.isEnded = response.isEnded;
                     this.movesHistory = response.movesHistory;
+                    this.firstPlayerTurn=true;
+                    this.secondPlayerTurn=false;
                     this.isWaiting = false;
                     break;
                 case "Time":
@@ -213,9 +210,9 @@ export default {
                     this.currentFen = response.currentFen;
                     this.movesHistory = response.movesHistory;
                     this.setClocktime(response.firstClockTime, response.secondClockTime);
-                    this.currentTurn = response.currentTurn;
                     this.isWaiting = response.isWaiting;
                     this.currentOrientation = response.currentOrientation;
+                    this.isGameStarted = response.gameStarted;
                     break;
                 case "Timeout":
                     this.isEnded = true;
@@ -253,7 +250,7 @@ export default {
             console.log("Game is over");
             setTimeout(() => {               
                 this.sendMessage({
-                    messageType: "GameOver",
+                    type: "GameOver",
                     user: this.user,
                 });
                 this.$router.push({path: "/"});
@@ -278,19 +275,15 @@ export default {
                 case 'R':
                 case 'B':
                 case 'N':
-                    return this.pieces[this.currentTurn][item[0]] + item.slice(1);
+                    return this.pieces[item[0]] + item.slice(1);
                 case 'O':
                     return item;
                 default:
-                    return this.pieces[this.currentTurn]['P'] + item;
+                    return this.pieces['P'] + item;
             }
         },
 
         nextTurn(data) {
-            if (this.isEnded) {
-                return;
-            }
-            this.currentTurn = data.turn;
             this.isWaiting = true;
             this.currentFen = data.fen;
             this.firstPlayerTurn = !this.firstPlayerTurn;
@@ -342,7 +335,9 @@ export default {
         },
 
         isWaiting() {
-            this.$refs.chessboard.board.set({ viewOnly: this.isWaiting })
+            this.$refs.chessboard.board.set({
+                viewOnly: this.isWaiting
+            });
         }
     }
 }
