@@ -40,16 +40,13 @@ import {chessboard} from 'vue-chessboard'
 import 'vue-chessboard/dist/vue-chessboard.css'
 import MovesContainer from '@/components/MovesContainer.vue'
 import StopClock from '@/components/StopClock.vue'
-
 export default {
     name: 'game',
-
     components: {
         chessboard,
         MovesContainer,
         StopClock
     },
-
     data() {
         return {
             firstPlayerName: "UNKNOWN",
@@ -57,23 +54,16 @@ export default {
             firstPlayerTurn: true,
             secondPlayerTurn: false,
             playerType: '',
-
             clockMinutes: 5,
             clockSeconds: 0,
-
             movesHistory: [],
-
             currentFen: '',
             currentOrientation: 'white',
             currentTimeout: null,
-
             isEnded: false,
             isWaiting: null,
-            isViewer: false,
             isGameStarted: false,
-
             connection: null,
-
             pieces: {
                 K: '♔',
                 Q: '♕',
@@ -84,7 +74,6 @@ export default {
             }
         }
     },
-
     methods: {
         onMove(data) {
             this.$refs.chessboard.board.set({
@@ -95,7 +84,6 @@ export default {
             }
             console.log('onMove emitted!');
             console.log(data);
-
             this.movesHistory.push(
                 {
                     move: this.transformToChessPiece(data.history[data.history.length - 1])
@@ -104,7 +92,6 @@ export default {
             
             this.checkGameOver();
             this.nextTurn(data);
-
             this.sendMessage({
                 type: "Move",
                 user: this.user,
@@ -113,7 +100,6 @@ export default {
                 movesHistory: this.movesHistory
             });
         },
-
         sendMessage(message) {
             try {
                 this.connection.send(JSON.stringify(message));
@@ -122,7 +108,6 @@ export default {
                 console.log(err);
             }
         },
-
         setClocktime(firstClockTime, secondClockTime) {
             if (this.playerType === "first" || this.playerType === "viewer") {
                 this.$refs.clock1.setTime(firstClockTime);
@@ -132,30 +117,24 @@ export default {
                 this.$refs.clock1.setTime(secondClockTime);
             }
         },
-
         connect() {
             console.log('Starting connection to WebSocket Server');
-
             const address = this.$route.params.address;
             const port = this.$route.params.port;
-            this.connection = new WebSocket(`ws://localhost:5001`);
-
+            this.connection = new WebSocket(`ws://${address}:${port}`);
             this.connection.onmessage = this.handleMessage;
             this.connection.onopen = this.handleOpenConnection;
             this.connection.onclose = this.handleCloseConnection;
         },
-
         handleMessage(event) {
             const response = JSON.parse(event.data);
             console.log(response);
-
             switch(response.type) {
                 case "Init":
                     this.firstPlayerName = response.firstPlayerName;
                     this.currentFen = response.currentFen;
                     this.isWaiting = true;
                     this.playerType = response.playerType;
-
                     switch (response.playerType) {
                         case "first":
                             this.currentOrientation = "white";
@@ -169,9 +148,14 @@ export default {
                             break;
                         case "viewer":
                             this.currentOrientation = "white";
+                            this.secondPlayerName = response.secondPlayerName;
+                            this.movesHistory = response.movesHistory;
+                            this.setClocktime(response.firstClockTime, response.secondClockTime);
+                            this.isGameStarted = response.gameStarted;
+                            this.firstPlayerTurn = response.firstPlayerTurn;
+                            this.secondPlayerTurn = response.secondPlayerTurn;
                             break;
                     }
-
                     break;
                 case "PlayerIn":
                     if (this.playerType === "viewer") {
@@ -192,9 +176,11 @@ export default {
                     this.currentFen = response.currentFen;
                     this.isEnded = response.isEnded;
                     this.movesHistory = response.movesHistory;
-                    this.firstPlayerTurn=true;
-                    this.secondPlayerTurn=false;
-                    this.isWaiting = false;
+                    this.firstPlayerTurn = !this.firstPlayerTurn;
+                    this.secondPlayerTurn = !this.secondPlayerTurn;
+                    if (this.playerType !== 'viewer') {
+                        this.isWaiting = false;
+                    }
                     break;
                 case "Time":
                     this.setClocktime(response.firstClockTime, response.secondClockTime);
@@ -203,6 +189,7 @@ export default {
                     console.log('Player has left the game');
                     break;
                 case "Reconnect":
+                    this.playerType = response.playerType;
                     this.firstPlayerName = response.firstPlayerName;
                     this.secondPlayerName = response.secondPlayerName;
                     this.firstPlayerTurn = response.firstPlayerTurn;
@@ -213,6 +200,7 @@ export default {
                     this.isWaiting = response.isWaiting;
                     this.currentOrientation = response.currentOrientation;
                     this.isGameStarted = response.gameStarted;
+                    
                     break;
                 case "Timeout":
                     this.isEnded = true;
@@ -223,14 +211,12 @@ export default {
                     return;
             }
         },
-
         handleOpenConnection(event) {
             this.sendMessage({
                 type: "Init",
                 user: this.user,
             });
         },
-
         handleCloseConnection(event) {
             if (!event.wasClean && !this.isEnded) {
                 console.log('Server is down, reconnecting');
@@ -239,13 +225,11 @@ export default {
                 }, 5000);
                 return;
             }
-
             this.sendMessage({
                 type: "Leave",
                 user: this.user,
             });
         },
-
         closeConnectionAfterGame() {
             console.log("Game is over");
             setTimeout(() => {               
@@ -256,7 +240,6 @@ export default {
                 this.$router.push({path: "/"});
             }, 5000);
         },
-
         checkGameOver() {
             if (this.movesHistory[this.movesHistory.length - 1].move.slice(-1) === '#') {
                 this.isEnded = true;
@@ -267,7 +250,6 @@ export default {
                 }
             }
         },
-
         transformToChessPiece(item) {
             switch (item[0]) {
                 case 'K':
@@ -282,14 +264,12 @@ export default {
                     return this.pieces['P'] + item;
             }
         },
-
         nextTurn(data) {
             this.isWaiting = true;
             this.currentFen = data.fen;
             this.firstPlayerTurn = !this.firstPlayerTurn;
             this.secondPlayerTurn = !this.secondPlayerTurn;
         },
-
         endTime() {
             this.isEnded = true;
             if (this.firstPlayerTurn) {
@@ -302,19 +282,15 @@ export default {
                 user: this.user,
             });
         },
-
     },
-
     created() {
         this.connect();
         this.user = localStorage.getItem("user_id");
     },
-
     destroyed() {
         clearTimeout(this.currentTimeout);
         this.connection.close();
     },
-
     computed: {
         run1() {
             return !this.isEnded && this.firstPlayerTurn && this.isGameStarted;
@@ -323,7 +299,6 @@ export default {
             return !this.isEnded && this.secondPlayerTurn && this.isGameStarted;
         },
     },
-
     watch: {
         isEnded() {
             if (this.isEnded) {
@@ -333,7 +308,6 @@ export default {
                 this.closeConnectionAfterGame();
             }
         },
-
         isWaiting() {
             this.$refs.chessboard.board.set({
                 viewOnly: this.isWaiting

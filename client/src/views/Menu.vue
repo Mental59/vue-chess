@@ -75,7 +75,6 @@ import { Client, createUser, createGame } from '@/api/grpc/client.js'
         if (event.isTrusted) {
           let room = await this.client.createGame();
           this.$router.push({path: `/chess/${room.address}/${room.port}`});
-          // this.$router.push({path: '/chess'});
         }
         
       },

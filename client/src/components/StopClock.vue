@@ -42,6 +42,14 @@ export default {
   watch: {
     run() {
       this.decideStartOrStop();
+    },
+
+    countSeconds() {
+      if (this.countMinutes == 0 && this.countSeconds == 0) {
+        this.stop();
+        this.isEnded = true;
+        this.$emit('end');
+      }
     }
   },
   mounted() {
@@ -57,10 +65,10 @@ export default {
     },
     start() {
       this.$emit('start');
-      this.timerID = setInterval(this.decrementTime, this.period);
+      // this.timerID = setInterval(this.decrementTime, this.period);
     },
     stop() {
-      clearInterval(this.timerID);
+      // clearInterval(this.timerID);
       this.$emit('stop');
     },
     decrementTime() {

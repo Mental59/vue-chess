@@ -2,14 +2,21 @@
 import asyncio
 import logging
 import subprocess
+import time
+
 import websockets
 import json
 from sys import argv
+from threading import Timer
+
+
+coroutine_timer=None
 
 host = ""
 port = ""
 
 websocketsList = []
+movesHistory=[]
 currentFen = ""
 startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
@@ -17,42 +24,189 @@ white_player = None
 black_player = None
 white_player_ID = ""
 black_player_ID = ""
+firstPlayerName="UNKNOWN"
+secondPlayerName="UNKNOWN"
 
+firstClockTime=60
+secondClockTime=60
+
+firstPlayerTurn=True
+secondPlayerTurn=False
+
+currentTurn="white"
+isEnded=False
+
+
+
+
+async def time_function():
+    global firstClockTime
+    global secondClockTime
+    global currentTurn
+    while firstClockTime > 0 and secondClockTime > 0:
+        if (currentTurn == "white"):
+            firstClockTime -= 1
+            data={"firstClockTime": firstClockTime,
+                  "secondClockTime": secondClockTime,
+                  "type": "Time"}
+        else:
+            secondClockTime -= 1
+            data = {"firstClockTime": firstClockTime,
+                    "secondClockTime": secondClockTime,
+                    "type": "Time"}
+        print("Timer tick")
+        for wbs in websocketsList:
+            await sendToSocket(wbs, json.dumps(data))
+        await asyncio.sleep(1)
+
+def time_counter():
+    asyncio.run(time_function())
 
 async def initPlayer(websocket, user_id):
     global white_player
     global black_player
     global white_player_ID
     global black_player_ID
-    if white_player is None and (white_player_ID == "" or white_player_ID == user_id):
-        white_player = websocket
-        white_player_ID = user_id
+    global firstPlayerName
+    global secondPlayerName
+    global coroutine_timer
+    data={}
 
-        data = {
-            "status": "false",
-            "orientation": "white"
-        }
-        await websocket.send(json.dumps(data))
-    elif black_player is None and (black_player_ID == "" or black_player_ID == user_id):
-        black_player = websocket
-        black_player_ID = user_id
-        data = {
-            "status": "false",
-            "orientation": "black"
-        }
-        black_player = websocket
-        black_player_ID = user_id
-        await websocket.send(json.dumps(data))
+    if white_player is None and white_player_ID == "":
+        white_player= websocket
+        white_player_ID= user_id
+        firstPlayerName = user_id
+        data={"type":"Init",
+              "firstPlayerName":firstPlayerName,
+              "playerType":"first",
+              "currentFen":startFen}
+
+        await sendToSocket(websocket,json.dumps(data))
+
+    elif black_player is None and black_player_ID=="" and white_player_ID!=user_id:
+        secondPlayerName=user_id
+        data={"type":"Init",
+              "firstPlayerName":secondPlayerName,
+              "playerType":"second",
+              "currentFen":startFen}
+        black_player=websocket
+        black_player_ID=user_id
+        await sendToSocket(websocket,json.dumps(data))
+
+
+
+        #Вход второго игрока
+        data={"type":"PlayerIn",
+              "firstPlayerName":firstPlayerName,
+              "secondPlayerName":secondPlayerName}
+        #await sendToSocket(websocket,json.dumps(data))
+        #if (white_player!=None):
+            #await sendToSocket(white_player,json.dumps(data))
+        
+        for wbs in websocketsList:
+            await sendToSocket(wbs,json.dumps(data))
+
+        #time_counter()
+        #await timer()
+        coroutine_timer= Timer(1,time_counter)
+        coroutine_timer.start()
+        #Timer().cancel()
+
+    elif white_player is None and white_player_ID==user_id:
+        white_player=websocket
+        data={ "type":"Reconnect",
+               "playerType":"first",
+               "firstPlayerName":firstPlayerName,
+               "secondPlayerName":secondPlayerName,
+               "firstPlayerTurn":firstPlayerTurn,
+               "secondPlayerTurn":secondPlayerTurn,
+               "currentFen":currentFen,
+               "movesHistory":movesHistory,
+               "firstClockTime": firstClockTime,
+               "secondClockTime": secondClockTime,
+               "currentTurn": currentTurn,
+               "isWaiting": currentTurn=="black",
+               "currentOrientation":"white",
+               "gameStarted": white_player_ID!="" and black_player_ID!=""
+             }
+        #if (black_player!=None):
+            #await sendToSocket(black_player,json.dumps(data))
+        await sendToSocket(websocket,json.dumps(data))
+        
+    elif black_player is None and black_player_ID==user_id:
+        black_player=websocket
+        data={ "type":"Reconnect",
+               "playerType": "second",
+               "firstPlayerName":secondPlayerName,
+               "secondPlayerName":firstPlayerName,
+               "firstPlayerTurn":secondPlayerTurn,
+               "secondPlayerTurn":firstPlayerTurn,
+               "currentFen":currentFen,
+               "movesHistory": movesHistory,
+               "firstClockTime": firstClockTime,
+               "secondClockTime": secondClockTime,
+               "currentTurn": currentTurn,
+               "isWaiting": currentTurn=="white",
+               "currentOrientation":"black",
+               "gameStarted": white_player_ID != "" and black_player_ID != ""
+             }
+        #if (white_player!=None):
+            #await sendToSocket(white_player,json.dumps(data))
+        await sendToSocket(websocket,json.dumps(data))
     else:
-        data = {
-            "status": "true",
-            "orientation": "white"
-        }
-        await websocket.send(json.dumps(data))
+        data={"type":"Init",
+              "firstPlayerName":firstPlayerName,
+              "secondPlayerName":secondPlayerName,
+              "movesHistory":movesHistory,
+              "firstClockTime":firstClockTime,
+              "secondClockTime":secondClockTime,
+              "playerType":"viewer",
+              "gameStarted":white_player_ID != "" and black_player_ID != "",
+              "firstPlayerTurn":firstPlayerTurn,
+              "secondPlayerTurn":secondPlayerTurn,
+              "currentFen":currentFen}
+        await sendToSocket(websocket, json.dumps(data))
+
+
+    
+    #await websocket.send(json.dumps(data))
+
+
+async def move(websocket,message):
+    global isEnded
+    global currentFen
+    global movesHistory
+    isEnded=message['isEnded']
+    currentFen=message['currentFen']
+    movesHistory=message['movesHistory']
+
+    data={"type":"Move",
+          "isEnded":isEnded,
+          "currentFen":currentFen,
+          "movesHistory":movesHistory}
+
+    for wbs in websocketsList:
+        if wbs!=websocket:
+            await sendToSocket(wbs,json.dumps(data))
+
+
+async def timeOut(websocket,message):
+    data={"type":"Timeout"}
+    for wbs in websocketsList:
+        if wbs!=websocket:
+            await sendToSocket(wbs,json.dumps(data))
+
+
+async def timeDecrease(websocket,message):
+    global firstClockTime
+    global secondClockTime
+    firstClockTime=message['firstClockTime']
+    secondClockTime=message['secondClockTime']
+
 
 
 async def sendToSocket(websocket, message):
-    async with websocket:
+    if (websocket!=None):
         await websocket.send(message)
 
 
@@ -74,24 +228,63 @@ async def consumer(websocket, message):
 async def handler(websocket, path):
     global white_player
     global black_player
+    global firstPlayerTurn
+    global secondPlayerTurn
+    global firstClockTime
+    global secondClockTime
+    global currentTurn
+    global coroutine_timer
     while True:
         if not websocketsList.__contains__(websocket):
             websocketsList.append(websocket)
         try:
             message = await websocket.recv()
             message = json.loads(message)
-            if (message['messageType'] == "Init"):
-                await initPlayer(websocket, message['user_id'])
-            else:
-                await consumer(websocket, message)
-        except websockets.ConnectionClosedOK:
+            if (message['type'] == "Init"):
+                await initPlayer(websocket, message['user'])
+            elif (message['type']=="Move"):
+                firstPlayerTurn= not firstPlayerTurn
+                secondPlayerTurn=not secondPlayerTurn
+                #coroutine_timer.cancel()
+                #coroutine_timer.start()
+                if currentTurn=="white":
+                    firstClockTime+=5
+                    currentTurn="black"
+                else:
+                    secondClockTime+=5
+                    currentTurn="white"
+                await move(websocket,message)
+                #дописать
+            elif (message['type']=="Time"):
+                print("TimeTick")
+                await timeDecrease(websocket,message)
+                #дописать
+            elif (message['type']=="Timeout"):
+                pass
+                #дописать
+            elif (message['type']=="Leave"):
+                pass
+            elif (message['type']=="GameOver"):
+                time.sleep(5)
+                exit()
+                #дописать
+        except (websockets.ConnectionClosedOK,websockets.ConnectionClosedError):
             if (white_player == websocket):
                 white_player = None
             if (black_player == websocket):
                 black_player = None
             websocketsList.remove(websocket)
-            print("Oops")
+            print("Someone disconnected")
             break
+        
+        #except websockets.ConnectionClosedOK:
+        #    if (white_player == websocket):
+        #        white_player = None
+        #    if (black_player == websocket):
+        #        black_player = None
+        #    websocketsList.remove(websocket)
+        #    print("Oops")
+        #    break
 
 
 async def main(h, p):
@@ -106,3 +299,5 @@ async def main(h, p):
 def start(host, port):
     print("Starting Room...")
     asyncio.run(main(host, port))
+
+start("localhost",5001)
