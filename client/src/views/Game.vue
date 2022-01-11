@@ -217,9 +217,18 @@ export default {
                 user: this.user,
             });
         },
+        makeToastBadConnection() {
+            this.$bvToast.toast('Bad server connection', {
+                title: 'Error',
+                autoHideDelay: 3000,
+                toaster: 'b-toaster-top-right',
+                solid: true,
+            })
+        },
         handleCloseConnection(event) {
             if (!event.wasClean && !this.isEnded) {
                 console.log('Server is down, reconnecting');
+                this.makeToastBadConnection();
                 this.currentTimeout = setTimeout(() => {
                     this.connect();
                 }, 5000);
