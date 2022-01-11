@@ -24,6 +24,7 @@ export class Client {
         // user - текущий пользователь
         this.connection = new DispatcherPromiseClient("http://172.16.10.38:8080", null, null);
         this.user = user;
+        this.errorGetGameList = {error: false};
         this.games = [];
         this.getGameList();
         this.getGameListIntervalID = setInterval(() => {
@@ -86,13 +87,14 @@ export class Client {
         this.games.length = 0; // очищение старого списка
         let stream = this.connection.getGameList(this.user, {});
         stream.on('data', (response) => {
+            this.errorGetGameList.error = false;
             this.games.push(response.toObject());
         });
         stream.on('error', (err) => {
+            this.errorGetGameList.error = true;
             console.log(`Unexpected stream error: code = ${err.code}` +
                 `, message = "${err.message}"`);
         });
-        console.log('New game list has been received!');
         return this.games;
     }
 

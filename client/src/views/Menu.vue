@@ -54,7 +54,8 @@ import { Client, createUser, createGame } from '@/api/grpc/client.js'
 
     data() {
       return {
-        games: []
+        games: [],
+        errorGetGameList: {error: false},
       }
     },
 
@@ -79,6 +80,15 @@ import { Client, createUser, createGame } from '@/api/grpc/client.js'
         
       },
 
+      makeToastBadGamesList() {
+        this.$bvToast.toast('Error occurred getting list of rooms', {
+            title: 'Error',
+            autoHideDelay: 5000,
+            toaster: 'b-toaster-top-right',
+            solid: true,
+        })
+      },
+
       uuid() {
         let uuidValue = "", k, randomValue;
         for (k = 0; k < 32; k++) {
@@ -93,6 +103,18 @@ import { Client, createUser, createGame } from '@/api/grpc/client.js'
       },
     },
 
+    watch: {
+      errorGetGameList: {
+        handler: function() {
+          console.log(this.errorGetGameList);
+          if (this.errorGetGameList.error) {
+            this.makeToastBadGamesList();
+          }
+        },
+        deep: true
+      }
+    },
+
     created() {
       if (localStorage.getItem('user_id') === null) {
         localStorage.setItem('user_id', this.uuid());
@@ -105,6 +127,7 @@ import { Client, createUser, createGame } from '@/api/grpc/client.js'
       );
 
       this.games = this.client.games;
+      this.errorGetGameList = this.client.errorGetGameList;
     },
 
     destroyed() {

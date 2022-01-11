@@ -218,7 +218,7 @@ export default {
             });
         },
         makeToastBadConnection() {
-            this.$bvToast.toast('Bad server connection', {
+            this.$bvToast.toast('Error occurred connecting to the room', {
                 title: 'Error',
                 autoHideDelay: 3000,
                 toaster: 'b-toaster-top-right',
