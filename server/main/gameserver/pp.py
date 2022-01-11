@@ -1,13 +1,11 @@
-
 import asyncio
-import logging
-import subprocess
 import time
-
 import websockets
 import json
-from sys import argv
 from threading import Timer
+import grpc
+import dispatcher_pb2
+import dispatcher_pb2_grpc
 
 
 coroutine_timer=None
@@ -37,6 +35,21 @@ currentTurn="white"
 isEnded=False
 
 
+def close_game():
+    with grpc.insecure_channel('host:port') as channel:
+        stub = dispatcher_pb2_grpc.DispatcherStub(channel)
+        user = dispatcher_pb2.User(
+            uuid=white_player_ID,
+            name=f'Player_{white_player_ID[:8]}'
+        )
+        game = dispatcher_pb2.Game(
+            owner=user,
+            state=0,
+            address=host,
+            port=port
+        )
+        response = stub.CloseGame(game)
+    print(f'Received close_game response: {response.text}')
 
 
 async def time_function():
@@ -266,6 +279,7 @@ async def handler(websocket, path):
                 pass
             elif (message['type']=="GameOver"):
                 time.sleep(5)
+                close_game()
                 exit()
                 #дописать
         except (websockets.ConnectionClosedOK,websockets.ConnectionClosedError):
