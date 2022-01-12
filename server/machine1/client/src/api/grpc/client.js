@@ -22,7 +22,7 @@ export function createGame({owner, state, address, port}) {
 export class Client {
     constructor(user) {
         // user - текущий пользователь
-        this.connection = new DispatcherPromiseClient("http://172.16.10.38:8080", null, null);
+        this.connection = new DispatcherPromiseClient("http://51.250.18.255:8080", null, null);
         this.user = user;
         this.errorGetGameList = {error: false};
         this.games = [];

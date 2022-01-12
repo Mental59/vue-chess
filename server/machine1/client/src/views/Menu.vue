@@ -68,7 +68,7 @@ import { Client, createUser, createGame } from '@/api/grpc/client.js'
 
       handleConnectViewer(event) {
         let room = event.room;
-        this.client.joinViewer(createGame(room));
+        this.client.joinVisitor(createGame(room));
         this.$router.push({path: `/chess/${room.address}/${room.port}`});
       },
 
