@@ -1,0 +1,29 @@
+services:
+  envoy:
+    build: 
+      context: envoy
+    ports:
+      - 8080:8080
+  
+  credis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - ./redis/data:/bitnami/redis/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/data:/data
+    ports:
+      - 6379:6379
+      
+  dispatcher:
+    build: ./dispatcher
+    ports:
+      - 14586:14586
+    depends_on:
+      - credis
+  client:
+    build: ./client
+    command: npm run serve -- --port 3000
+    ports:
+      - 3000:3000
